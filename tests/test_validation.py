@@ -1,6 +1,7 @@
 """Schema-level validation: Jev limits and structured inputs."""
 
 import pytest
+from pydantic import ValidationError
 
 from laya_serve.schemas import SystemOneRequest
 
@@ -46,13 +47,17 @@ def test_accepts_object_and_array_state():
         ["Hi", "My card was charged twice."],
     ):
         req = SystemOneRequest.model_validate(
-            {"state": state, "model": "jev-latest", "questions": {"q": {"type": "noul", "instructions": "x?"}}}
+            {
+                "state": state,
+                "model": "jev-latest",
+                "questions": {"q": {"type": "noul", "instructions": "x?"}},
+            }
         )
         assert req.state == state
 
 
 def test_rejects_256_choice_options():
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         SystemOneRequest.model_validate(
             _req(
                 {
@@ -84,28 +89,46 @@ def test_accepts_255_choice_options():
 @pytest.mark.parametrize("n_levels", [2, 10])
 def test_accepts_score_level_bounds(n_levels):
     req = SystemOneRequest.model_validate(
-        _req({"q": {"type": "score", "instructions": "x", "criteria": [f"l{i}" for i in range(n_levels)]}})
+        _req(
+            {
+                "q": {
+                    "type": "score",
+                    "instructions": "x",
+                    "criteria": [f"l{i}" for i in range(n_levels)],
+                }
+            }
+        )
     )
     assert len(req.questions["q"].criteria) == n_levels
 
 
 @pytest.mark.parametrize("n_levels", [1, 11])
 def test_rejects_score_levels_outside_2_to_10(n_levels):
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         SystemOneRequest.model_validate(
-            _req({"q": {"type": "score", "instructions": "x", "criteria": [f"l{i}" for i in range(n_levels)]}})
+            _req(
+                {
+                    "q": {
+                        "type": "score",
+                        "instructions": "x",
+                        "criteria": [f"l{i}" for i in range(n_levels)],
+                    }
+                }
+            )
         )
 
 
 def test_rejects_empty_questions_and_missing_model():
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         SystemOneRequest.model_validate({"state": "x", "model": "m", "questions": {}})
-    with pytest.raises(Exception):
-        SystemOneRequest.model_validate({"state": "x", "questions": {"q": {"type": "noul", "instructions": "y?"}}})
+    with pytest.raises(ValidationError):
+        SystemOneRequest.model_validate(
+            {"state": "x", "questions": {"q": {"type": "noul", "instructions": "y?"}}}
+        )
 
 
 def test_rejects_unknown_question_type():
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         SystemOneRequest.model_validate(
             _req({"q": {"type": "generate", "instructions": "write a poem"}})
         )

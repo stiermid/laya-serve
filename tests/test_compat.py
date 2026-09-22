@@ -107,7 +107,9 @@ def test_resolve_model_aliases():
 
 def test_backend_answer_mismatch_is_422():
     with pytest.raises(CompatError):
-        compat.shape_response({"a": {"type": "noul"}}, {"b": {"type": "noul", "noul": 0.1}}, {}, "m")
+        compat.shape_response(
+            {"a": {"type": "noul"}}, {"b": {"type": "noul", "noul": 0.1}}, {}, "m"
+        )
 
 
 def test_bad_choice_selection_is_422():
