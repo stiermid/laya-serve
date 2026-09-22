@@ -1,2 +1,102 @@
 # laya-serve
 
+Jev-compatible HTTP server for [Laya](https://huggingface.co/convaiinnovations/laya)
+System One decision models. Point any Jev client at this server and get typed
+`choice` / `score` / `noul` answers from local Laya weights instead of the
+TypeSafe API.
+
+## Quickstart
+
+```bash
+pip install "laya-serve[inference]"
+LAYA_SERVE_BACKEND=laya LAYA_SERVE_PRELOAD=true laya-serve
+```
+
+```bash
+curl -X POST localhost:8000/v1/systemone \
+  -H "Content-Type: application/json" -d '{
+    "state": "Help! My payouts have been failing for 3 days.",
+    "model": "jev-latest",
+    "questions": {
+      "department": {
+        "type": "choice",
+        "instructions": "Which team should handle this?",
+        "criteria": {
+          "billing": "Payments, invoicing, refunds",
+          "technical": "Bugs, outages, integrations",
+          "sales": "Pricing, upgrades, new accounts"
+        }
+      },
+      "is_urgent": {"type": "noul", "instructions": "The message conveys urgency?"}
+    }
+  }'
+```
+
+Without weights (API development, CI):
+
+```bash
+pip install -e ".[test]"
+LAYA_SERVE_BACKEND=fake laya-serve  # deterministic uniform answers
+```
+
+## Endpoints
+
+| Method | Path | Notes |
+| ------ | ---- | ----- |
+| `POST` | `/v1/systemone` | Jev-compatible evaluation endpoint |
+| `GET` | `/v1/models` | Serving model + accepted aliases |
+| `GET` | `/healthz` | Liveness probe (not part of the Jev API) |
+
+Errors use `{"error": {"message", "field"}}` with Jev status codes
+(`401` bad key, `422` validation, plus `429`/`529` reserved for future
+rate-limit/overload handling).
+
+## Configuration (`LAYA_SERVE_` env prefix)
+
+| Variable | Default | Meaning |
+| -------- | ------- | ------- |
+| `LAYA_SERVE_BACKEND` | `fake` | `laya` (real weights) or `fake` (weight-free) |
+| `LAYA_SERVE_SERVING_MODEL` | `laya-english` | Id reported in the `model` response field |
+| `LAYA_SERVE_EXTRA_MODELS` | `` | Extra accepted `model` names, comma-separated |
+| `LAYA_SERVE_DEVICE` | auto | Passed to the Laya Router (`cuda`, `cpu`, …) |
+| `LAYA_SERVE_MAX_LOADED` | `1` | Router LRU cap on resident checkpoints |
+| `LAYA_SERVE_PRELOAD` | `false` | Preload all checkpoints (recommended for servers) |
+| `LAYA_SERVE_API_KEY` | unset | When set, requires `Authorization: Bearer <key>` |
+
+Accepted `model` names out of the box: `jev-latest`, `jev-preview`,
+`jev-1.13.0`, `jev-1.13`, `laya`, `laya-latest`, plus the serving model id
+itself. Anything else is a `422` (fail fast on typos, like Jev).
+
+## Jev compatibility notes
+
+Verified against `docs.typesafe.ai` and `laya` 0.3.x source. Deliberate,
+documented divergences:
+
+1. **Laya-only fields are stripped**: `action` on every answer, and
+   `confidence` on `noul` answers. Responses contain exactly the Jev fields.
+2. **`model` echoes the serving checkpoint** (e.g. `laya-english`), the same
+   way Jev echoes the resolved version id (`jev-1.13.0`).
+3. **`output_tokens` is `0`**. Laya never generates tokens; this layer does
+   not invent counts. `input_tokens` is the backend's token count.
+4. **Confidence formula differs**: Laya uses entropy-based
+   `1 - H(p)/log(k)`; Jev documents a peak-based normalization. Same
+   probabilities can yield different `confidence` values — calibrate
+   thresholds against Laya, not Jev.
+5. **Validation**: choice ≤ 255 options, score 2–10 levels, `model` required,
+   non-empty `questions` — all `422`. Context budgets are the checkpoint's
+   own (`max_len`/`head_max_len`); oversized option sets surface as `422`,
+   not Jev's 64k/32k accounting.
+6. **Score `legend`/`probabilities` keys are strings** on the wire
+   (`{"0": …}`), matching Jev HTTP.
+7. **`choice` criteria as a list** is accepted leniently (mapped to
+   `{label: None}`); Jev requires a map.
+
+## Development
+
+```bash
+python -m venv .venv && .venv/bin/pip install -e ".[test]"
+.venv/bin/python -m pytest -q
+```
+
+Commits are small and single-purpose; each `feat:` was verified by execution
+before committing (see `git log`).
