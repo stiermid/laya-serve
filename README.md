@@ -1,5 +1,9 @@
 # laya-serve
 
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](pyproject.toml)
+[![API](https://img.shields.io/badge/API-Jev--compatible-green.svg)](https://docs.typesafe.ai/api)
+
 Jev-compatible HTTP server for [Laya](https://huggingface.co/convaiinnovations/laya)
 System One decision models. Point any Jev client at this server and get typed
 `choice` / `score` / `noul` answers from local Laya weights instead of the
@@ -98,5 +102,6 @@ python -m venv .venv && .venv/bin/pip install -e ".[test]"
 .venv/bin/python -m pytest -q
 ```
 
-Commits are small and single-purpose; each `feat:` was verified by execution
-before committing (see `git log`).
+## License
+
+Apache-2.0 — see [LICENSE](LICENSE).
