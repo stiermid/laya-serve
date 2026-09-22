@@ -20,9 +20,7 @@ class Settings(BaseSettings):
     @property
     def extra_models_set(self) -> frozenset[str]:
         """Parsed :attr:`extra_models` as a set of names."""
-        return frozenset(
-            part.strip() for part in self.extra_models.split(",") if part.strip()
-        )
+        return frozenset(part.strip() for part in self.extra_models.split(",") if part.strip())
 
     # Inference backend: "laya" (real weights) or "fake" (deterministic,
     # weight-free answers for tests and local dev).

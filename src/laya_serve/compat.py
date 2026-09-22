@@ -53,7 +53,9 @@ class CompatError(ValueError):
         self.field = field
 
 
-def resolve_model(requested: str, serving_model: str, extra_models: frozenset[str] = frozenset()) -> str:
+def resolve_model(
+    requested: str, serving_model: str, extra_models: frozenset[str] = frozenset()
+) -> str:
     """Validate the requested ``model`` and return the id to report.
 
     Known Jev names (plus operator-configured extras) resolve to
@@ -81,7 +83,9 @@ def _clamp01(value: Any, field: str) -> float:
 def shape_noul(question_id: str, raw: dict[str, Any]) -> NoulAnswer:
     """Shape a raw ``noul`` answer; drops Laya-only ``confidence``/``action``."""
     if "noul" not in raw:
-        raise CompatError(f"noul answer {question_id!r} is missing 'noul'", field=f"answers.{question_id}")
+        raise CompatError(
+            f"noul answer {question_id!r} is missing 'noul'", field=f"answers.{question_id}"
+        )
     return NoulAnswer(type="noul", noul=_clamp01(raw["noul"], f"answers.{question_id}.noul"))
 
 
@@ -102,7 +106,10 @@ def shape_choice(question_id: str, raw: dict[str, Any], options: list[str]) -> C
     return ChoiceAnswer(
         type="choice",
         choice=choice,
-        probabilities={opt: _clamp01(probs[opt], f"answers.{question_id}.probabilities.{opt}") for opt in options},
+        probabilities={
+            opt: _clamp01(probs[opt], f"answers.{question_id}.probabilities.{opt}")
+            for opt in options
+        },
         confidence=_clamp01(raw.get("confidence"), f"answers.{question_id}.confidence"),
     )
 
@@ -138,7 +145,10 @@ def shape_score(
         score=score,
         legend={str(i): level for i, level in enumerate(levels)},
         probabilities={
-            str(i): _clamp01(probs[i] if i in probs else probs[str(i)], f"answers.{question_id}.probabilities.{i}")
+            str(i): _clamp01(
+                probs[i] if i in probs else probs[str(i)],
+                f"answers.{question_id}.probabilities.{i}",
+            )
             for i in range(len(levels))
         },
         confidence=_clamp01(raw.get("confidence"), f"answers.{question_id}.confidence"),

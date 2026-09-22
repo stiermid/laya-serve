@@ -18,15 +18,15 @@ Wire format notes:
 
 from __future__ import annotations
 
-from typing import Annotated, Any, Literal, Union
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
 # JSON scalar structures accepted anywhere Jev allows "structured" text.
-StructuredText = Union[str, dict[str, Any], list[Any]]
+StructuredText = str | dict[str, Any] | list[Any]
 
 # Raw JSON state: plain text, a record/object, or a sequence of records.
-StateT = Union[str, dict[str, Any], list[Any]]
+StateT = str | dict[str, Any] | list[Any]
 
 MAX_CHOICE_OPTIONS = 255
 MIN_SCORE_LEVELS = 2
@@ -75,7 +75,7 @@ class ScoreQuestion(BaseModel):
 
 
 QuestionT = Annotated[
-    Union[NoulQuestion, ChoiceQuestion, ScoreQuestion],
+    NoulQuestion | ChoiceQuestion | ScoreQuestion,
     Field(discriminator="type"),
 ]
 
@@ -117,7 +117,7 @@ class ScoreAnswer(BaseModel):
 
 
 AnswerT = Annotated[
-    Union[NoulAnswer, ChoiceAnswer, ScoreAnswer],
+    NoulAnswer | ChoiceAnswer | ScoreAnswer,
     Field(discriminator="type"),
 ]
 

@@ -24,9 +24,7 @@ class Backend(Protocol):
 
     serving_model: str
 
-    def predict(
-        self, state: Any, questions: dict[str, dict[str, Any]]
-    ) -> dict[str, Any]:
+    def predict(self, state: Any, questions: dict[str, dict[str, Any]]) -> dict[str, Any]:
         """Return ``{"answers": {...}, "usage": {...}}`` with raw backend answers."""
         ...
 
@@ -38,9 +36,7 @@ class FakeBackend:
         self.serving_model = serving_model
         self.calls: list[dict[str, Any]] = []
 
-    def predict(
-        self, state: Any, questions: dict[str, dict[str, Any]]
-    ) -> dict[str, Any]:
+    def predict(self, state: Any, questions: dict[str, dict[str, Any]]) -> dict[str, Any]:
         self.calls.append({"state": state, "questions": questions})
         answers: dict[str, Any] = {}
         for qid, qdef in questions.items():
@@ -89,9 +85,7 @@ class LayaBackend:
             preload=settings.preload,
         )
 
-    def predict(
-        self, state: Any, questions: dict[str, dict[str, Any]]
-    ) -> dict[str, Any]:
+    def predict(self, state: Any, questions: dict[str, dict[str, Any]]) -> dict[str, Any]:
         result = self._router.predict(state, questions)
         # Router adds a non-Jev ``routing`` key; compat shaping ignores it.
         return {

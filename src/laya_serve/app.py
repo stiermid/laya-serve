@@ -54,7 +54,9 @@ def create_app(
         loc = ".".join(str(p) for p in first.get("loc", ())) or None
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            content={"error": {"message": first.get("msg", "request failed validation"), "field": loc}},
+            content={
+                "error": {"message": first.get("msg", "request failed validation"), "field": loc}
+            },
         )
 
     @app.exception_handler(compat.CompatError)
