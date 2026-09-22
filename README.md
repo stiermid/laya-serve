@@ -102,6 +102,21 @@ python -m venv .venv && .venv/bin/pip install -e ".[test]"
 .venv/bin/python -m pytest -q
 ```
 
+Or with [uv](https://docs.astral.sh/uv/) (reproducible, via `uv.lock`):
+
+```bash
+uv sync --extra test
+uv run pytest -q
+```
+
+Lint/format via [ruff](https://docs.astral.sh/ruff/) and hooks via
+[pre-commit](https://pre-commit.com/):
+
+```bash
+uvx ruff check src tests && uvx ruff format --check src tests
+pre-commit install && pre-commit run --all-files
+```
+
 ## License
 
 Apache-2.0 — see [LICENSE](LICENSE).
