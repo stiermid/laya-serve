@@ -19,6 +19,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from . import __version__ as _package_version
 from . import compat
 from .inference import Backend, OverloadedError, build_backend, is_overload
 from .schemas import SystemOneRequest
@@ -52,7 +53,7 @@ def create_app(
     settings = settings or Settings()
     backend = backend or build_backend(settings)
 
-    app = FastAPI(title="laya-serve", version="0.1.0")
+    app = FastAPI(title="laya-serve", version=_package_version)
     app.state.settings = settings
     app.state.backend = backend
 

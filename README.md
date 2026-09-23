@@ -127,7 +127,8 @@ pre-commit install && pre-commit run --all-files
 ## Documentation
 
 Versioned docs (Zensical + `mike`): <https://stiermid.github.io/laya-serve/>
-(`latest` tracks the newest `v*` tag, `dev` tracks `master`).
+(`latest` tracks the newest `v*` tag with the `v` stripped, `dev` tracks `master` —
+see `docs/versioning.md`).
 
 ```bash
 uv sync --extra docs

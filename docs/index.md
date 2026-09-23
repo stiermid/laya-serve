@@ -58,4 +58,5 @@ and `/redoc` once the server is running.
 - [API](api.md) — request/response shapes and error codes.
 - [Jev compatibility](jev-compatibility.md) — verified divergences.
 - [Deployment](deployment.md) — Docker and production checklist.
+- [Versioning](versioning.md) — package vs docs vs serving-model vs Jev names.
 - [API reference](reference.md) — auto-generated module docs.
