@@ -86,16 +86,27 @@ def test_invalid_question_is_422_with_jev_error_shape(client):
 def test_auth_enforced_when_key_configured():
     app = create_app(Settings(api_key="secret"), FakeBackend("laya-english"))
     authed = TestClient(app, raise_server_exceptions=False)
-    assert authed.post("/v1/systemone", json=TRIAGE_BODY).status_code == 401
-    assert (
-        authed.post(
-            "/v1/systemone", json=TRIAGE_BODY, headers={"Authorization": "Bearer wrong"}
-        ).status_code
-        == 401
+    missing = authed.post("/v1/systemone", json=TRIAGE_BODY)
+    assert missing.status_code == 401
+    assert missing.json() == {"error": {"message": "Missing or invalid API key.", "field": None}}
+    wrong = authed.post(
+        "/v1/systemone", json=TRIAGE_BODY, headers={"Authorization": "Bearer wrong"}
     )
+    assert wrong.status_code == 401
+    assert set(wrong.json()) == {"error"}
     assert (
         authed.post(
             "/v1/systemone", json=TRIAGE_BODY, headers={"Authorization": "Bearer secret"}
         ).status_code
         == 200
     )
+
+
+def test_auth_error_matches_error_schema():
+    from laya_serve.schemas import ErrorResponse
+
+    app = create_app(Settings(api_key="secret"), FakeBackend("laya-english"))
+    authed = TestClient(app, raise_server_exceptions=False)
+    response = authed.post("/v1/systemone", json=TRIAGE_BODY)
+    assert response.status_code == 401
+    ErrorResponse.model_validate(response.json())
