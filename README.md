@@ -90,9 +90,12 @@ documented divergences:
    probabilities can yield different `confidence` values — calibrate
    thresholds against Laya, not Jev.
 5. **Validation**: choice ≤ 255 options, score 2–10 levels, `model` required,
-   non-empty `questions` — all `422`. Context budgets are the checkpoint's
-   own (`max_len`/`head_max_len`); oversized option sets surface as `422`,
-   not Jev's 64k/32k accounting.
+   non-empty `questions` — all `422`. Context budgets mirror Jev's 64k
+   (state + all questions) / 32k (state + longest question) accounting and
+   surface as `422`, as do option sets overflowing the per-question head
+   budget; request sizes are counted with the checkpoint tokenizer when
+   one is loaded, word approximation otherwise. The checkpoint still
+   truncates per-question sequences at its own `max_len`.
 6. **Score `legend`/`probabilities` keys are strings** on the wire
    (`{"0": …}`), matching Jev HTTP.
 7. **`choice` criteria as a list** is accepted leniently (mapped to

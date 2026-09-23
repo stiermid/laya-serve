@@ -10,13 +10,48 @@ without model weights installed:
 * :class:`LayaBackend` — wraps ``laya.Router``. Import of ``laya`` (and
   therefore ``torch``) happens lazily inside the constructor, so merely
   importing this module stays cheap.
+
+Context budgets (Jev: 64k total, 32k state+longest-question) are enforced
+pre-inference from :meth:`Backend.count`, so oversize requests fail fast
+with ``422`` instead of being silently truncated downstream.
 """
 
 from __future__ import annotations
 
+import json
 from typing import Any, Protocol
 
 from .settings import Settings
+
+# Jev token budgets per request (see ``docs.typesafe.ai/models``).
+JEV_MAX_TOTAL_TOKENS = 65_536
+JEV_MAX_STATE_QUESTION_TOKENS = 32_768
+
+
+def render_text(value: Any) -> str:
+    """Render one value as text, mirroring ``laya.common.render_criterion``."""
+    if isinstance(value, str):
+        return value
+    return json.dumps(value, ensure_ascii=False, separators=(", ", ": "), default=str)
+
+
+def render_question_text(qdef: dict[str, Any]) -> str:
+    """Rendered size basis of one question: instructions + criteria descriptions."""
+    parts = [render_text(qdef.get("instructions", ""))]
+    criteria = qdef.get("criteria")
+    if isinstance(criteria, dict):
+        parts.extend(render_text(v) for v in criteria.values() if v is not None)
+    elif isinstance(criteria, list):
+        parts.extend(render_text(level) for level in criteria)
+    return " ".join(part for part in parts if part)
+
+
+def count_request(state: Any, questions: dict[str, dict[str, Any]]) -> tuple[int, int]:
+    """Weight-free (total, state+longest-question) word count of a request."""
+    state_n = len(render_text(state).split())
+    per_question = [len(render_question_text(q).split()) for q in questions.values()]
+    longest = max(per_question, default=0)
+    return state_n + sum(per_question), state_n + longest
 
 
 class OverloadedError(Exception):
@@ -64,18 +99,33 @@ class Backend(Protocol):
     """Minimal interface the API layer needs from any inference backend."""
 
     serving_model: str
+    # Token budgets enforced pre-inference (Jev: 64k total, 32k
+    # state+longest-question). Backends that predate this interface simply
+    # omit them and skip enforcement.
+    max_total_tokens: int
+    max_state_question_tokens: int
 
     def predict(self, state: Any, questions: dict[str, dict[str, Any]]) -> dict[str, Any]:
         """Return ``{"answers": {...}, "usage": {...}}`` with raw backend answers."""
+        ...
+
+    def count(self, state: Any, questions: dict[str, dict[str, Any]]) -> tuple[int, int]:
+        """Return ``(total, state_plus_longest)`` token estimates for budgets."""
         ...
 
 
 class FakeBackend:
     """Deterministic weight-free backend for tests and local development."""
 
+    max_total_tokens = JEV_MAX_TOTAL_TOKENS
+    max_state_question_tokens = JEV_MAX_STATE_QUESTION_TOKENS
+
     def __init__(self, serving_model: str = "laya-english") -> None:
         self.serving_model = serving_model
         self.calls: list[dict[str, Any]] = []
+
+    def count(self, state: Any, questions: dict[str, dict[str, Any]]) -> tuple[int, int]:
+        return count_request(state, questions)
 
     def predict(self, state: Any, questions: dict[str, dict[str, Any]]) -> dict[str, Any]:
         self.calls.append({"state": state, "questions": questions})
@@ -111,6 +161,9 @@ class FakeBackend:
 class LayaBackend:
     """Production backend wrapping ``laya.Router`` (lazy import)."""
 
+    max_total_tokens = JEV_MAX_TOTAL_TOKENS
+    max_state_question_tokens = JEV_MAX_STATE_QUESTION_TOKENS
+
     def __init__(self, settings: Settings) -> None:
         try:
             from laya import Router
@@ -140,6 +193,44 @@ class LayaBackend:
             "answers": result["answers"],
             "usage": result.get("usage", {"input_tokens": 0, "output_tokens": 0}),
         }
+
+    def count(self, state: Any, questions: dict[str, dict[str, Any]]) -> tuple[int, int]:
+        """Estimate request tokens with a resident checkpoint tokenizer if any.
+
+        Falls back to the weight-free word count when no checkpoint is
+        loaded yet (cold start) or tokenization fails. Counts are raw
+        lengths without ``build_sequence`` truncation, so genuinely
+        oversize states still trip the budgets instead of saturating.
+        """
+        tok = self._resident_tokenizer()
+        if tok is None:
+            return count_request(state, questions)
+        try:
+            state_n = len(tok(render_text(state), add_special_tokens=False)["input_ids"])
+            per_question = [
+                len(tok(render_question_text(q), add_special_tokens=False)["input_ids"])
+                for q in questions.values()
+            ]
+        except Exception:
+            return count_request(state, questions)
+        longest = max(per_question, default=0)
+        return state_n + sum(per_question), state_n + longest
+
+    def _resident_tokenizer(self) -> Any | None:
+        """Return a loaded checkpoint tokenizer, most-recently-used first."""
+        try:
+            order = list(getattr(self._router, "_order", []) or [])
+            agents = getattr(self._router, "_agents", {}) or {}
+        except Exception:
+            return None
+        for key in reversed(order):
+            try:
+                tok = getattr(agents.get(key), "tok", None)
+            except Exception:
+                continue
+            if tok is not None:
+                return tok
+        return None
 
 
 def build_backend(settings: Settings) -> Backend:

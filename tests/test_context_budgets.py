@@ -19,11 +19,12 @@ unknown models and malformed questions do. Current gaps this fixture pins:
 
 ``BudgetBackend`` below is a weight-free stand-in for ``LayaBackend``:
 same overflow signals, configurable budgets so tests stay fast. Token
-counting here is naive word splitting (documented approximation); the
-real fix must count with the checkpoint tokenizer before inference.
+counting here is naive word splitting (documented approximation);
+``LayaBackend.count`` uses a resident checkpoint tokenizer when one is
+loaded and the same word approximation otherwise.
 
-The ``xfail(strict=True)`` markers are the TODO: each must turn green
-(and lose its marker) when budget enforcement lands.
+Enforcement lives in ``service.enforce_budgets`` (pre-inference ``422``)
+plus a ``ValueError`` → ``CompatError`` mapping for head-budget overflow.
 """
 
 import pytest
@@ -136,7 +137,6 @@ def test_within_budget_passes(budget_client):
     assert response.status_code == 200, response.text
 
 
-@pytest.mark.xfail(reason="total token budget not enforced yet", strict=True)
 def test_oversize_total_is_422(budget_client):
     """State + all questions over budget must be 422, not silent 200."""
     client, backend = budget_client
@@ -152,7 +152,6 @@ def test_oversize_total_is_422(budget_client):
     assert set(response.json()) == {"error"}
 
 
-@pytest.mark.xfail(reason="state+longest-question budget not enforced yet", strict=True)
 def test_oversize_state_plus_longest_question_is_422(budget_client):
     """State + longest question over budget must be 422, not silent 200."""
     client, backend = budget_client
@@ -172,7 +171,6 @@ def test_oversize_state_plus_longest_question_is_422(budget_client):
     assert set(response.json()) == {"error"}
 
 
-@pytest.mark.xfail(reason="head-budget overflow surfaces as 500, must be 422", strict=True)
 def test_head_budget_overflow_is_422_not_500(budget_client):
     """255 schema-valid options with fat descriptions must be 422, not 500."""
     from laya_serve.schemas import ErrorResponse
@@ -196,3 +194,94 @@ def test_head_budget_overflow_is_422_not_500(budget_client):
     )
     assert response.status_code == 422, response.text
     ErrorResponse.model_validate(response.json())
+
+
+def test_head_value_error_maps_to_422_when_within_token_budgets():
+    """Exercise the ValueError path itself: token budgets pass, head overflows."""
+    from laya_serve.schemas import ErrorResponse
+
+    backend = BudgetBackend(max_total_tokens=10**9, max_state_question_tokens=10**9, head_budget=5)
+    client = TestClient(create_app(Settings(), backend), raise_server_exceptions=False)
+    response = client.post(
+        "/v1/systemone",
+        json={
+            "state": "hi",
+            "model": "jev-latest",
+            "questions": {
+                "big": {
+                    "type": "choice",
+                    "instructions": "Pick one.",
+                    "criteria": {f"o{i}": "some description here" for i in range(10)},
+                }
+            },
+        },
+    )
+    assert response.status_code == 422, response.text
+    payload = response.json()
+    ErrorResponse.model_validate(payload)
+    assert payload["error"]["field"] == "questions.big.criteria"
+
+
+def test_non_budget_value_error_stays_500():
+    """A ValueError without budget markers is a backend bug, not a 422."""
+
+    class BugBackend:
+        serving_model = "laya-english"
+
+        def predict(self, state, questions):
+            raise ValueError("unexpected backend bug")
+
+    client = TestClient(create_app(Settings(), BugBackend()), raise_server_exceptions=False)
+    response = client.post(
+        "/v1/systemone",
+        json={
+            "state": "hi",
+            "model": "jev-latest",
+            "questions": {"q": {"type": "noul", "instructions": "Urgent?"}},
+        },
+    )
+    assert response.status_code == 500, response.text
+    assert set(response.json()) == {"error"}
+
+
+def test_backends_without_budget_interface_skip_enforcement():
+    """Pre-budget backends keep working: no count/budgets means no 422."""
+    from laya_serve.service import enforce_budgets
+
+    class LegacyBackend:
+        serving_model = "laya-english"
+
+        def predict(self, state, questions):
+            raise AssertionError("must not be called")
+
+    enforce_budgets(
+        "hi " * 100000, {"q": {"type": "noul", "instructions": "x?" * 100000}}, LegacyBackend()
+    )  # must not raise
+
+
+def test_count_request_word_counts():
+    from laya_serve.inference import count_request
+
+    total, longest = count_request(
+        "s1 s2",
+        {
+            "a": {
+                "type": "choice",
+                "instructions": "i1",
+                "criteria": {"x": "d1 d2", "y": None},
+            },
+            "b": {"type": "score", "instructions": "i2", "criteria": ["l1", "l2 l3"]},
+        },
+    )
+    assert (total, longest) == (2 + 3 + 4, 2 + 4)
+
+
+def test_laya_count_falls_back_without_resident_agent():
+    from laya_serve.inference import LayaBackend, count_request
+
+    backend = LayaBackend.__new__(LayaBackend)
+    backend.serving_model = "laya-english"
+    backend._router = None
+    state = {"message": "hello world"}
+    questions = {"q": {"type": "noul", "instructions": "Urgent?"}}
+    assert backend.count(state, questions) == count_request(state, questions)
