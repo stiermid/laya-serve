@@ -22,7 +22,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: uv sync --frozen --extra docs
-      - run: uv run --frozen mkdocs build --strict
+      - run: uv run --frozen zensical build --strict
 
   deploy:
     needs: [build]

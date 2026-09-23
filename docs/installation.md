@@ -42,7 +42,7 @@ uv run pytest -q
 | ----- | -------- | ------- |
 | `test` | `pytest`, `httpx` | local dev, CI, `fake` backend |
 | `inference` | `laya>=0.3.0`, `torch>=2.0.0`, `transformers>=4.48.0` | `laya` backend with real checkpoints |
-| `docs` | `mkdocs-material`, `mkdocstrings`, `mike` | building this site |
+| `docs` | `zensical`, `mkdocstrings-python`, `mike` | building this site |
 
 ## Docker
 

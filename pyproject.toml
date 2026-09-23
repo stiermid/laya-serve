@@ -30,10 +30,9 @@ dependencies = [
 
 [project.optional-dependencies]
 docs = [
-    "mike>=2.0.0",
-    "mkdocs>=1.6.0",
-    "mkdocs-material>=9.0.0",
-    "mkdocstrings[python]>=0.29.0",
+    "mike @ git+https://github.com/squidfunk/mike.git",
+    "mkdocstrings-python>=2.0.0",
+    "zensical>=0.0.64",
 ]
 inference = [
     "laya>=0.3.0",

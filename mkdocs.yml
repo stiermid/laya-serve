@@ -7,6 +7,7 @@ copyright: Apache-2.0 &mdash; see <a href="https://github.com/stiermid/laya-serv
 
 theme:
   name: material
+  variant: classic
   features:
     - navigation.tabs
     - navigation.sections
