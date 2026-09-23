@@ -13,7 +13,7 @@ startup instead of on first request. Tune residency with
 `LAYA_SERVE_MAX_LOADED=1` and placement with `LAYA_SERVE_DEVICE=cuda`
 (or `cpu`).
 
-Host/port use uvicorn env/config or defaults (`0.0.0.0:8000`).
+Host/port are CLI flags (`laya-serve --host 0.0.0.0 --port 8000`).
 Put TLS termination and rate limiting in front (reverse proxy / gateway);
 `429` handling in-app is future work.
 

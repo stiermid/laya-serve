@@ -38,12 +38,16 @@ Strict build (same as CI):
 uv run zensical build --strict
 ```
 
-Versioned preview with `mike`:
+Versioned preview with `mike` (local branch only, never `--push` by hand —
+CI owns `gh-pages`):
 
 ```bash
-uv run mike deploy --push dev
+uv run mike deploy dev
 uv run mike serve
 ```
+
+See [Versioning](versioning.md) for the `dev` / `X.Y.Z` / `latest` scheme
+and the release checklist.
 
 ## Backend notes
 

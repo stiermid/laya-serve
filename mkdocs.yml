@@ -62,6 +62,7 @@ nav:
       - API: api.md
       - Jev compatibility: jev-compatibility.md
       - Deployment: deployment.md
+      - Versioning: versioning.md
   - Contributing:
       - Development: development.md
   - Reference:
