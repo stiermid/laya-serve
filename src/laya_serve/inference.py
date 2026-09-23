@@ -19,6 +19,47 @@ from typing import Any, Protocol
 from .settings import Settings
 
 
+class OverloadedError(Exception):
+    """Transient backend overload; handled as a Jev-shaped ``529``.
+
+    Backends raise this when inference could succeed on retry after a
+    short delay (GPU OOM under burst load, evicted checkpoint reload,
+    upstream timeout). Clients retry with backoff, honoring
+    ``Retry-After``.
+    """
+
+    pass
+
+
+# Substrings (lowercased) marking a generic exception as transient
+# overload rather than a hard internal failure. Matched against
+# ``str(exc)`` and the exception type name, so torch OOMs
+# (``torch.cuda.OutOfMemoryError`` / ``RuntimeError: CUDA out of
+# memory``) map to ``529`` without importing torch here.
+_OVERLOAD_MARKERS = frozenset(
+    {
+        "out of memory",
+        "outofmemory",
+        "cuda oom",
+        "overloaded",
+        "temporarily unavailable",
+        "temporarily overloaded",
+        "capacity",
+        "backpressure",
+        "too many requests",
+        "timed out",
+        "timeout",
+        "busy",
+    }
+)
+
+
+def is_overload(exc: BaseException) -> bool:
+    """Return whether ``exc`` looks like transient overload (retryable)."""
+    haystack = f"{type(exc).__name__} {exc}".lower()
+    return any(marker in haystack for marker in _OVERLOAD_MARKERS)
+
+
 class Backend(Protocol):
     """Minimal interface the API layer needs from any inference backend."""
 
@@ -86,7 +127,14 @@ class LayaBackend:
         )
 
     def predict(self, state: Any, questions: dict[str, dict[str, Any]]) -> dict[str, Any]:
-        result = self._router.predict(state, questions)
+        try:
+            result = self._router.predict(state, questions)
+        except OverloadedError:
+            raise
+        except Exception as exc:
+            if is_overload(exc):
+                raise OverloadedError(f"backend overloaded: {exc}") from exc
+            raise
         # Router adds a non-Jev ``routing`` key; compat shaping ignores it.
         return {
             "answers": result["answers"],

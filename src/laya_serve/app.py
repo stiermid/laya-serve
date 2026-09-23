@@ -5,19 +5,30 @@ Endpoints (Jev-compatible):
 * ``POST /v1/systemone`` — evaluate state + questions, return typed answers.
 * ``GET /v1/models`` — list servable model names/aliases.
 * ``GET /healthz`` — liveness probe (not part of the Jev API).
+
+Errors are always Jev-shaped (``{"error": {"message", "field"}}``):
+``401`` bad key, ``422`` validation, ``529`` transient overload (with
+``Retry-After``), ``500`` unexpected backend failure.
 """
 
+import logging
 from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI, Header, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from . import compat
-from .inference import Backend, build_backend
+from .inference import Backend, OverloadedError, build_backend, is_overload
 from .schemas import SystemOneRequest
 from .service import evaluate, list_models
 from .settings import Settings
+
+logger = logging.getLogger(__name__)
+
+# Jev overload status has no ``starlette.status`` constant (non-standard).
+HTTP_529_OVERLOADED = 529
 
 
 class AuthError(Exception):
@@ -74,6 +85,43 @@ def create_app(
         return JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED,
             content={"error": {"message": str(exc), "field": None}},
+        )
+
+    @app.exception_handler(OverloadedError)
+    async def overloaded_handler(_: Request, exc: OverloadedError) -> JSONResponse:
+        logger.warning("backend overloaded: %s", exc)
+        return JSONResponse(
+            status_code=HTTP_529_OVERLOADED,
+            content={"error": {"message": str(exc), "field": None}},
+            headers={"Retry-After": "1"},
+        )
+
+    @app.exception_handler(StarletteHTTPException)
+    async def http_handler(_: Request, exc: StarletteHTTPException) -> JSONResponse:
+        # Preserve the status (404/405/…) but keep the Jev error body so
+        # SDK clients never see FastAPI's ``{"detail": …}`` shape.
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"error": {"message": str(exc.detail), "field": None}},
+            headers=getattr(exc, "headers", None),
+        )
+
+    @app.exception_handler(Exception)
+    async def unhandled_handler(_: Request, exc: Exception) -> JSONResponse:
+        # Raw backend bugs (torch errors, malformed payloads) must not
+        # leak as ``500 text/plain``; shape them for SDK error parsing.
+        # OOM-like messages are transient: report 529 so clients back off.
+        if is_overload(exc):
+            logger.warning("backend overloaded: %r", exc)
+            return JSONResponse(
+                status_code=HTTP_529_OVERLOADED,
+                content={"error": {"message": f"backend overloaded: {exc}", "field": None}},
+                headers={"Retry-After": "1"},
+            )
+        logger.exception("unhandled error processing request")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"error": {"message": "Internal server error.", "field": None}},
         )
 
     @app.get("/healthz")
