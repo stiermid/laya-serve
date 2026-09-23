@@ -16,7 +16,7 @@
         <link rel="prev" href="../jev-compatibility/">
       
       
-        <link rel="next" href="../development/">
+        <link rel="next" href="../versioning/">
       
       
         
@@ -746,6 +746,33 @@
 
                 
               
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../versioning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Versioning
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
             </ul>
           </nav>
         
@@ -1042,7 +1069,7 @@
 startup instead of on first request. Tune residency with
 <code>LAYA_SERVE_MAX_LOADED=1</code> and placement with <code>LAYA_SERVE_DEVICE=cuda</code>
 (or <code>cpu</code>).</p>
-<p>Host/port use uvicorn env/config or defaults (<code>0.0.0.0:8000</code>).
+<p>Host/port are CLI flags (<code>laya-serve --host 0.0.0.0 --port 8000</code>).
 Put TLS termination and rate limiting in front (reverse proxy / gateway);
 <code>429</code> handling in-app is future work.</p>
 <h2 id="docker">Docker<a class="headerlink" href="#docker" title="Permanent link">&para;</a></h2>

@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://stiermid.github.io/laya-serve/dev/development/">
       
       
-        <link rel="prev" href="../deployment/">
+        <link rel="prev" href="../versioning/">
       
       
         <link rel="next" href="../reference/">
@@ -652,6 +652,33 @@
 
                 
               
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../versioning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Versioning
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
             </ul>
           </nav>
         
@@ -1055,10 +1082,13 @@ uv<span class="w"> </span>run<span class="w"> </span>zensical<span class="w"> </
 <p>Strict build (same as CI):</p>
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>zensical<span class="w"> </span>build<span class="w"> </span>--strict
 </code></pre></div>
-<p>Versioned preview with <code>mike</code>:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>mike<span class="w"> </span>deploy<span class="w"> </span>--push<span class="w"> </span>dev
+<p>Versioned preview with <code>mike</code> (local branch only, never <code>--push</code> by hand —
+CI owns <code>gh-pages</code>):</p>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>mike<span class="w"> </span>deploy<span class="w"> </span>dev
 uv<span class="w"> </span>run<span class="w"> </span>mike<span class="w"> </span>serve
 </code></pre></div>
+<p>See <a href="../versioning/">Versioning</a> for the <code>dev</code> / <code>X.Y.Z</code> / <code>latest</code> scheme
+and the release checklist.</p>
 <h2 id="backend-notes">Backend notes<a class="headerlink" href="#backend-notes" title="Permanent link">&para;</a></h2>
 <ul>
 <li>The HTTP layer depends only on the <code>Backend</code> protocol
