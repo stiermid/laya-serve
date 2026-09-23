@@ -47,4 +47,10 @@ jobs:
             uv run --frozen mike set-default --push latest
           else
             uv run --frozen mike deploy --push dev
+            # First-ever deploy has no default, so the site root 404s.
+            # Point the root at dev until the first stable tag creates
+            # `latest` and takes over as default. Never clobber `latest`.
+            if ! uv run --frozen mike list latest >/dev/null 2>&1; then
+              uv run --frozen mike set-default --push dev
+            fi
           fi
