@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/github/license/stiermid/laya-serve.svg)](LICENSE)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![API](https://img.shields.io/badge/API-Jev--compatible-green.svg)](https://docs.typesafe.ai/api)
-[![Docs](https://img.shields.io/badge/docs-material-blue.svg)](https://stiermid.github.io/laya-serve/)
+[![Docs](https://img.shields.io/badge/docs-zensical-blue.svg)](https://stiermid.github.io/laya-serve/)
 
 Jev-compatible HTTP server for [Laya](https://huggingface.co/convaiinnovations/laya)
 System One decision models. Point any Jev client at this server and get typed
@@ -126,13 +126,13 @@ pre-commit install && pre-commit run --all-files
 
 ## Documentation
 
-Versioned docs (Material for MkDocs + `mike`): <https://stiermid.github.io/laya-serve/>
+Versioned docs (Zensical + `mike`): <https://stiermid.github.io/laya-serve/>
 (`latest` tracks the newest `v*` tag, `dev` tracks `master`).
 
 ```bash
 uv sync --extra docs
-uv run mkdocs serve        # local preview
-uv run mkdocs build --strict  # same check CI runs
+uv run zensical serve        # local preview
+uv run zensical build --strict  # same check CI runs
 ```
 
 ## License

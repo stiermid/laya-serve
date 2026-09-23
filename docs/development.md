@@ -28,14 +28,14 @@ pre-commit install && pre-commit run --all-files
 
 ```bash
 uv sync --extra docs
-uv run mkdocs serve
+uv run zensical serve
 # -> http://127.0.0.1:8000
 ```
 
 Strict build (same as CI):
 
 ```bash
-uv run mkdocs build --strict
+uv run zensical build --strict
 ```
 
 Versioned preview with `mike`:
