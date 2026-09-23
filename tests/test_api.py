@@ -4,7 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from laya_serve.app import create_app
-from laya_serve.inference import FakeBackend
+from laya_serve.inference import FakeBackend, OverloadedError
 from laya_serve.settings import Settings
 
 TRIAGE_BODY = {
@@ -110,3 +110,71 @@ def test_auth_error_matches_error_schema():
     response = authed.post("/v1/systemone", json=TRIAGE_BODY)
     assert response.status_code == 401
     ErrorResponse.model_validate(response.json())
+
+
+def _backend_client(backend):
+    return TestClient(create_app(Settings(), backend), raise_server_exceptions=False)
+
+
+def test_backend_failure_is_jev_500_without_leaking_internals():
+    from laya_serve.schemas import ErrorResponse
+
+    class BoomBackend:
+        serving_model = "laya-english"
+
+        def predict(self, state, questions):
+            raise RuntimeError("CUDA driver at /usr/lib/secret boom")
+
+    response = _backend_client(BoomBackend()).post("/v1/systemone", json=TRIAGE_BODY)
+    assert response.status_code == 500
+    assert response.headers["content-type"].startswith("application/json")
+    payload = response.json()
+    assert set(payload) == {"error"}
+    ErrorResponse.model_validate(payload)
+    assert payload["error"] == {"message": "Internal server error.", "field": None}
+
+
+def test_backend_oom_maps_to_529_with_retry_after():
+    from laya_serve.schemas import ErrorResponse
+
+    class OomBackend:
+        serving_model = "laya-english"
+
+        def predict(self, state, questions):
+            raise RuntimeError("CUDA out of memory. Tried to allocate 2.00 GiB")
+
+    response = _backend_client(OomBackend()).post("/v1/systemone", json=TRIAGE_BODY)
+    assert response.status_code == 529
+    assert response.headers.get("retry-after") == "1"
+    ErrorResponse.model_validate(response.json())
+
+
+def test_backend_overloaded_error_is_529():
+    class BusyBackend:
+        serving_model = "laya-english"
+
+        def predict(self, state, questions):
+            raise OverloadedError("all workers busy")
+
+    response = _backend_client(BusyBackend()).post("/v1/systemone", json=TRIAGE_BODY)
+    assert response.status_code == 529
+    assert response.headers.get("retry-after") == "1"
+    assert set(response.json()) == {"error"}
+
+
+def test_malformed_backend_payload_is_jev_500():
+    class MalformedBackend:
+        serving_model = "laya-english"
+
+        def predict(self, state, questions):
+            return {"bogus": {}}
+
+    response = _backend_client(MalformedBackend()).post("/v1/systemone", json=TRIAGE_BODY)
+    assert response.status_code == 500
+    assert set(response.json()) == {"error"}
+
+
+def test_unknown_route_is_jev_shaped_404(client):
+    response = client.get("/nope")
+    assert response.status_code == 404
+    assert set(response.json()) == {"error"}

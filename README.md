@@ -54,8 +54,9 @@ LAYA_SERVE_BACKEND=fake laya-serve  # deterministic uniform answers
 | `GET` | `/healthz` | Liveness probe (not part of the Jev API) |
 
 Errors use `{"error": {"message", "field"}}` with Jev status codes
-(`401` bad key, `422` validation, plus `429`/`529` reserved for future
-rate-limit/overload handling).
+(`401` bad key, `422` validation, `529` transient overload with a
+`Retry-After` header, `500` unexpected backend failure with internals
+logged server-side; `429` rate-limit handling is still future work).
 
 ## Configuration (`LAYA_SERVE_` env prefix)
 
