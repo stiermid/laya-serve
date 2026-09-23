@@ -63,5 +63,7 @@ nav:
       - Deployment: deployment.md
   - Contributing:
       - Development: development.md
+  - Reference:
+      - API reference: reference.md
 
 strict: true
