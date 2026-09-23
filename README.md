@@ -1,8 +1,9 @@
 # laya-serve
 
 [![CI](https://github.com/stiermid/laya-serve/actions/workflows/ci.yml/badge.svg)](https://github.com/stiermid/laya-serve/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](pyproject.toml)
+[![PyPI](https://img.shields.io/pypi/v/laya-serve.svg)](https://pypi.org/project/laya-serve/)
+[![License](https://img.shields.io/github/license/stiermid/laya-serve.svg)](LICENSE)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![API](https://img.shields.io/badge/API-Jev--compatible-green.svg)](https://docs.typesafe.ai/api)
 
 Jev-compatible HTTP server for [Laya](https://huggingface.co/convaiinnovations/laya)
