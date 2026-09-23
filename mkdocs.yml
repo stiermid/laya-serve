@@ -53,5 +53,15 @@ extra:
 
 nav:
   - Home: index.md
+  - Getting started:
+      - Installation: installation.md
+      - Quickstart: quickstart.md
+      - Configuration: configuration.md
+  - Guide:
+      - API: api.md
+      - Jev compatibility: jev-compatibility.md
+      - Deployment: deployment.md
+  - Contributing:
+      - Development: development.md
 
 strict: true

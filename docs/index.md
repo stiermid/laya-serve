@@ -49,3 +49,12 @@ LAYA_SERVE_BACKEND=fake laya-serve  # deterministic uniform answers
 
 Interactive OpenAPI docs are served by the app itself at `/docs` (Swagger UI)
 and `/redoc` once the server is running.
+
+## Next steps
+
+- [Installation](installation.md) — Python, Docker, and extras.
+- [Quickstart](quickstart.md) — start the server and ask a question.
+- [Configuration](configuration.md) — `LAYA_SERVE_*` variables, backends, auth.
+- [API](api.md) — request/response shapes and error codes.
+- [Jev compatibility](jev-compatibility.md) — verified divergences.
+- [Deployment](deployment.md) — Docker and production checklist.
