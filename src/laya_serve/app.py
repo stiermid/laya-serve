@@ -9,7 +9,7 @@ Endpoints (Jev-compatible):
 
 from typing import Annotated, Any
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
+from fastapi import Depends, FastAPI, Header, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
@@ -20,15 +20,18 @@ from .service import evaluate, list_models
 from .settings import Settings
 
 
+class AuthError(Exception):
+    """Raised when bearer auth fails; handled as a Jev-shaped ``401``."""
+
+    pass
+
+
 def _require_auth(authorization: str | None, settings: Settings) -> None:
     """Enforce bearer auth iff ``settings.api_key`` is configured."""
     if settings.api_key is None:
         return
     if authorization != f"Bearer {settings.api_key}":
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Missing or invalid API key.",
-        )
+        raise AuthError("Missing or invalid API key.")
 
 
 def create_app(
@@ -64,6 +67,13 @@ def create_app(
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             content={"error": {"message": str(exc), "field": exc.field}},
+        )
+
+    @app.exception_handler(AuthError)
+    async def auth_handler(_: Request, exc: AuthError) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"error": {"message": str(exc), "field": None}},
         )
 
     @app.get("/healthz")
