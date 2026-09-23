@@ -1,0 +1,57 @@
+site_name: laya-serve
+site_description: Jev-compatible HTTP server for Laya System One decision models
+site_url: https://stiermid.github.io/laya-serve/
+repo_url: https://github.com/stiermid/laya-serve
+repo_name: stiermid/laya-serve
+copyright: Apache-2.0 &mdash; see <a href="https://github.com/stiermid/laya-serve/blob/master/LICENSE">LICENSE</a>
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  palette:
+    - scheme: default
+      primary: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            show_root_heading: true
+            heading_level: 2
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+extra:
+  version:
+    provider: mike
+
+nav:
+  - Home: index.md
+
+strict: true
