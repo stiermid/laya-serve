@@ -7,8 +7,9 @@ Endpoints (Jev-compatible):
 * ``GET /healthz`` — liveness probe (not part of the Jev API).
 
 Errors are always Jev-shaped (``{"error": {"message", "field"}}``):
-``401`` bad key, ``422`` validation, ``529`` transient overload (with
-``Retry-After``), ``500`` unexpected backend failure.
+``401`` bad key, ``422`` validation, ``429`` rate limit (with
+``Retry-After``), ``529`` transient overload (with ``Retry-After``),
+``500`` unexpected backend failure.
 """
 
 import logging
@@ -22,6 +23,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from . import __version__ as _package_version
 from . import compat
 from .inference import Backend, OverloadedError, build_backend, is_overload
+from .ratelimit import RateLimiter, RateLimitExceeded
 from .schemas import SystemOneRequest
 from .service import evaluate, list_models
 from .settings import Settings
@@ -46,16 +48,27 @@ def _require_auth(authorization: str | None, settings: Settings) -> None:
         raise AuthError("Missing or invalid API key.")
 
 
+def _rate_limit_key(request: Request, settings: Settings) -> str:
+    """Client identity for rate limiting: API key when set, else client IP."""
+    auth = request.headers.get("authorization")
+    if settings.api_key is not None and auth:
+        return f"key:{auth}"
+    client = request.client.host if request.client else "unknown"
+    return f"ip:{client}"
+
+
 def create_app(
     settings: Settings | None = None,
     backend: Backend | None = None,
 ) -> FastAPI:
     settings = settings or Settings()
     backend = backend or build_backend(settings)
+    limiter = RateLimiter(settings.rate_limit_per_minute)
 
     app = FastAPI(title="laya-serve", version=_package_version)
     app.state.settings = settings
     app.state.backend = backend
+    app.state.limiter = limiter
 
     def get_settings(request: Request) -> Settings:
         return request.app.state.settings
@@ -86,6 +99,14 @@ def create_app(
         return JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED,
             content={"error": {"message": str(exc), "field": None}},
+        )
+
+    @app.exception_handler(RateLimitExceeded)
+    async def ratelimit_handler(_: Request, exc: RateLimitExceeded) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            content={"error": {"message": str(exc), "field": None}},
+            headers={"Retry-After": str(exc.retry_after)},
         )
 
     @app.exception_handler(OverloadedError)
@@ -139,11 +160,16 @@ def create_app(
     @app.post("/v1/systemone", status_code=status.HTTP_200_OK)
     def systemone(
         request: SystemOneRequest,
+        http_request: Request,
         settings_dep: Annotated[Any, Depends(get_settings)],
         backend_dep: Annotated[Any, Depends(get_backend)],
         authorization: Annotated[str | None, Header()] = None,
     ) -> dict[str, Any]:
         _require_auth(authorization, settings_dep)
+        limiter_dep: RateLimiter = http_request.app.state.limiter
+        allowed, retry_after = limiter_dep.check(_rate_limit_key(http_request, settings_dep))
+        if not allowed:
+            raise RateLimitExceeded(retry_after)
         return evaluate(request, backend_dep, settings_dep)
 
     return app

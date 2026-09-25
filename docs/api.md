@@ -81,12 +81,13 @@ All errors use `{"error": {"message", "field"}}`:
 | ------ | ------- | ------ |
 | `401` | Missing/invalid `Authorization: Bearer <key>` | No |
 | `422` | Validation: bad question shape, unknown `model`, empty `questions`, context budget exceeded | No — fix the request |
+| `429` | Rate limit exceeded (`LAYA_SERVE_RATE_LIMIT_PER_MINUTE`) with `Retry-After` | Yes, with backoff |
 | `529` | Transient overload (GPU OOM, evicted checkpoint, timeout) with `Retry-After: 1` | Yes, with backoff |
 | `500` | Unexpected backend failure; internals are logged server-side, never leaked | No |
 | `404`/`405` | Unknown route/method, still in the Jev error shape (never FastAPI `{"detail": …}`) | No |
 
 Validation limits: choice ≤ 255 options, score 2–10 levels, `model` required,
 non-empty `questions`. Context budgets mirror Jev's 64k (state + all questions)
-and 32k (state + longest question); oversize requests are `422`. Sizes are
-counted with the checkpoint tokenizer when one is resident, word approximation
-otherwise.
+and 32k (state + longest question); oversize requests are `422`. Sizes use a
+deterministic word count on every backend so the `200`/`422` boundary is
+stable; per-request `usage.input_tokens` still comes from the Router.

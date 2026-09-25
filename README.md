@@ -55,9 +55,10 @@ LAYA_SERVE_BACKEND=fake laya-serve  # deterministic uniform answers
 | `GET` | `/healthz` | Liveness probe (not part of the Jev API) |
 
 Errors use `{"error": {"message", "field"}}` with Jev status codes
-(`401` bad key, `422` validation, `529` transient overload with a
-`Retry-After` header, `500` unexpected backend failure with internals
-logged server-side; `429` rate-limit handling is still future work).
+(`401` bad key, `422` validation, `429` rate limit with a `Retry-After`
+header when `LAYA_SERVE_RATE_LIMIT_PER_MINUTE > 0`, `529` transient overload
+with a `Retry-After` header, `500` unexpected backend failure with internals
+logged server-side).
 
 ## Configuration (`LAYA_SERVE_` env prefix)
 
@@ -70,6 +71,7 @@ logged server-side; `429` rate-limit handling is still future work).
 | `LAYA_SERVE_MAX_LOADED` | `1` | Router LRU cap on resident checkpoints |
 | `LAYA_SERVE_PRELOAD` | `false` | Preload all checkpoints (recommended for servers) |
 | `LAYA_SERVE_API_KEY` | unset | When set, requires `Authorization: Bearer <key>` |
+| `LAYA_SERVE_RATE_LIMIT_PER_MINUTE` | `0` | `POST /v1/systemone` limit per 60s window per client; `0` disables |
 
 Accepted `model` names out of the box: `jev-latest`, `jev-preview`,
 `jev-1.13.0`, `jev-1.13`, `laya`, `laya-latest`, plus the serving model id
@@ -94,8 +96,8 @@ documented divergences:
    non-empty `questions` — all `422`. Context budgets mirror Jev's 64k
    (state + all questions) / 32k (state + longest question) accounting and
    surface as `422`, as do option sets overflowing the per-question head
-   budget; request sizes are counted with the checkpoint tokenizer when
-   one is loaded, word approximation otherwise. The checkpoint still
+   budget; request sizes use a deterministic word count on every backend
+   so the `200`/`422` boundary is stable. The checkpoint still
    truncates per-question sequences at its own `max_len`.
 6. **Score `legend`/`probabilities` keys are strings** on the wire
    (`{"0": …}`), matching Jev HTTP.

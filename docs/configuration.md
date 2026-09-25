@@ -12,6 +12,7 @@ All settings use the `LAYA_SERVE_` environment prefix
 | `LAYA_SERVE_MAX_LOADED` | `1` | Router LRU cap on resident checkpoints |
 | `LAYA_SERVE_PRELOAD` | `false` | Preload all checkpoints (recommended for servers) |
 | `LAYA_SERVE_API_KEY` | unset | When set, requires `Authorization: Bearer <key>` |
+| `LAYA_SERVE_RATE_LIMIT_PER_MINUTE` | `0` | `POST /v1/systemone` limit per 60s window per client; `0` disables |
 
 ## Backends
 
@@ -50,3 +51,11 @@ curl -H "Authorization: Bearer $LAYA_SERVE_API_KEY" ...
 
 Missing or wrong keys return `401` in the Jev error shape.
 `/healthz` and `/v1/models` stay unauthenticated.
+
+## Rate limiting
+
+`LAYA_SERVE_RATE_LIMIT_PER_MINUTE=60` allows 60 `POST /v1/systemone`
+requests per 60s window per client identity (the `Authorization` value when
+`API_KEY` is set, else client IP). Excess requests return Jev-shaped `429`
+with `Retry-After`. `0` (default) disables in-process limiting. Counters are
+per-process; multi-worker deployments should enforce limits at the gateway.
