@@ -14,8 +14,10 @@ startup instead of on first request. Tune residency with
 (or `cpu`).
 
 Host/port are CLI flags (`laya-serve --host 0.0.0.0 --port 8000`).
-Put TLS termination and rate limiting in front (reverse proxy / gateway);
-`429` handling in-app is future work.
+Put TLS termination in front (reverse proxy / gateway). Single-process
+deployments can set `LAYA_SERVE_RATE_LIMIT_PER_MINUTE` for in-process `429`
+handling; multi-worker deployments should enforce rate limits at the gateway
+(per-process counters do not coordinate).
 
 ## Docker
 

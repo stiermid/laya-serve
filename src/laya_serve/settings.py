@@ -34,3 +34,10 @@ class Settings(BaseSettings):
     # When set, clients must send ``Authorization: Bearer <api_key>``.
     # Unset means no auth (local dev default).
     api_key: str | None = None
+
+    # In-process fixed-window rate limit for ``POST /v1/systemone``,
+    # in requests per 60s window per client identity (API key when
+    # configured, else client IP). ``0`` (default) disables limiting to
+    # preserve single-process dev behaviour; production behind multiple
+    # workers should enforce limits at the gateway instead.
+    rate_limit_per_minute: int = 0

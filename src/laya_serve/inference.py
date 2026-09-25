@@ -13,7 +13,10 @@ without model weights installed:
 
 Context budgets (Jev: 64k total, 32k state+longest-question) are enforced
 pre-inference from :meth:`Backend.count`, so oversize requests fail fast
-with ``422`` instead of being silently truncated downstream.
+with ``422`` instead of being silently truncated downstream. Enforcement
+uses the deterministic weight-free word count on every backend so the
+``200``/``422`` boundary never depends on which checkpoints happen to be
+resident; per-request ``usage.input_tokens`` still comes from the Router.
 """
 
 from __future__ import annotations
@@ -195,42 +198,16 @@ class LayaBackend:
         }
 
     def count(self, state: Any, questions: dict[str, dict[str, Any]]) -> tuple[int, int]:
-        """Estimate request tokens with a resident checkpoint tokenizer if any.
+        """Estimate request size with the deterministic weight-free word count.
 
-        Falls back to the weight-free word count when no checkpoint is
-        loaded yet (cold start) or tokenization fails. Counts are raw
-        lengths without ``build_sequence`` truncation, so genuinely
-        oversize states still trip the budgets instead of saturating.
+        Deliberately independent of resident checkpoint tokenizers so the
+        ``200``/``422`` boundary is stable across cold starts, evictions,
+        and ``max_loaded`` rotation. Word counts underestimate true tokens,
+        so enforcement is lenient (fail-open); precise
+        ``usage.input_tokens`` still comes from the Router in
+        :meth:`predict`.
         """
-        tok = self._resident_tokenizer()
-        if tok is None:
-            return count_request(state, questions)
-        try:
-            state_n = len(tok(render_text(state), add_special_tokens=False)["input_ids"])
-            per_question = [
-                len(tok(render_question_text(q), add_special_tokens=False)["input_ids"])
-                for q in questions.values()
-            ]
-        except Exception:
-            return count_request(state, questions)
-        longest = max(per_question, default=0)
-        return state_n + sum(per_question), state_n + longest
-
-    def _resident_tokenizer(self) -> Any | None:
-        """Return a loaded checkpoint tokenizer, most-recently-used first."""
-        try:
-            order = list(getattr(self._router, "_order", []) or [])
-            agents = getattr(self._router, "_agents", {}) or {}
-        except Exception:
-            return None
-        for key in reversed(order):
-            try:
-                tok = getattr(agents.get(key), "tok", None)
-            except Exception:
-                continue
-            if tok is not None:
-                return tok
-        return None
+        return count_request(state, questions)
 
 
 def build_backend(settings: Settings) -> Backend:

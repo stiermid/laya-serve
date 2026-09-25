@@ -20,8 +20,8 @@ unknown models and malformed questions do. Current gaps this fixture pins:
 ``BudgetBackend`` below is a weight-free stand-in for ``LayaBackend``:
 same overflow signals, configurable budgets so tests stay fast. Token
 counting here is naive word splitting (documented approximation);
-``LayaBackend.count`` uses a resident checkpoint tokenizer when one is
-loaded and the same word approximation otherwise.
+budget enforcement uses the same deterministic word count on every
+backend so the ``200``/``422`` boundary never depends on residency.
 
 Enforcement lives in ``service.enforce_budgets`` (pre-inference ``422``)
 plus a ``ValueError`` → ``CompatError`` mapping for head-budget overflow.
@@ -283,5 +283,28 @@ def test_laya_count_falls_back_without_resident_agent():
     backend.serving_model = "laya-english"
     backend._router = None
     state = {"message": "hello world"}
+    questions = {"q": {"type": "noul", "instructions": "Urgent?"}}
+    assert backend.count(state, questions) == count_request(state, questions)
+
+
+def test_laya_count_ignores_resident_tokenizer():
+    """Enforcement boundary must not depend on checkpoint residency."""
+    from laya_serve.inference import LayaBackend, count_request
+
+    class FakeTok:
+        def __call__(self, *args, **kwargs):
+            raise AssertionError("tokenizer must not be consulted for budgets")
+
+    class FakeAgent:
+        tok = FakeTok()
+
+    class FakeRouter:
+        _order = ["ckpt-a", "ckpt-b"]
+        _agents = {"ckpt-a": FakeAgent(), "ckpt-b": FakeAgent()}
+
+    backend = LayaBackend.__new__(LayaBackend)
+    backend.serving_model = "laya-english"
+    backend._router = FakeRouter()
+    state = "hello world foo bar"
     questions = {"q": {"type": "noul", "instructions": "Urgent?"}}
     assert backend.count(state, questions) == count_request(state, questions)

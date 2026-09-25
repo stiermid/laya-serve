@@ -17,9 +17,9 @@ Deliberate, documented divergences:
    non-empty `questions` — all `422`. Context budgets mirror Jev's 64k
    (state + all questions) / 32k (state + longest question) accounting and
    surface as `422`, as do option sets overflowing the per-question head
-   budget; request sizes are counted with the checkpoint tokenizer when
-   one is loaded, word approximation otherwise. The checkpoint still
-   truncates per-question sequences at its own `max_len`.
+   budget; request sizes use a deterministic word count on every backend
+   so the `200`/`422` boundary is stable across cold starts and evictions.
+   The checkpoint still truncates per-question sequences at its own `max_len`.
 6. **Score `legend`/`probabilities` keys are strings** on the wire
    (`{"0": …}`), matching Jev HTTP.
 7. **`choice` criteria as a list** is accepted leniently (mapped to
@@ -28,6 +28,9 @@ Deliberate, documented divergences:
 ## Practical notes
 
 - Unknown `model` names are `422` (fail fast on typos, like Jev).
-- `429` rate-limit handling is future work; transient pressure surfaces as
-  `529` with `Retry-After: 1`.
+- `429` is enforced in-process on `POST /v1/systemone` when
+  `LAYA_SERVE_RATE_LIMIT_PER_MINUTE > 0` (per API key, else per client IP),
+  with `Retry-After`; transient pressure surfaces as `529` with
+  `Retry-After: 1`. Multi-worker deployments should enforce limits at the
+  gateway.
 - `500` responses never leak backend internals; details go to server logs.

@@ -28,6 +28,10 @@ the code in `src/laya_serve/`.
 
 ::: laya_serve.inference
 
+## Rate limiting
+
+::: laya_serve.ratelimit
+
 ## CLI
 
 ::: laya_serve.cli
