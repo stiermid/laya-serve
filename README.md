@@ -133,7 +133,7 @@ Versioned docs (Zensical + `mike`): <https://stiermid.github.io/laya-serve/>
 see `docs/versioning.md`).
 
 ```bash
-uv sync --extra docs
+uv sync --group docs
 uv run zensical serve        # local preview
 uv run zensical build --strict  # same check CI runs
 ```

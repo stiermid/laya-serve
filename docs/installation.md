@@ -36,13 +36,20 @@ uv sync --extra test
 uv run pytest -q
 ```
 
-## Extras
+## Extras and docs group
 
 | Extra | Pulls in | Use for |
 | ----- | -------- | ------- |
 | `test` | `pytest`, `httpx` | local dev, CI, `fake` backend |
 | `inference` | `laya>=0.3.0`, `torch>=2.0.0`, `transformers>=4.48.0` | `laya` backend with real checkpoints |
-| `docs` | `zensical`, `mkdocstrings-python`, `mike` | building this site |
+
+Docs tooling (`zensical`, `mkdocstrings-python`, `mike`) is a
+`dependency-group`, not an extra — PyPI rejects the git-pinned `mike`
+dependency, so it must stay out of built package metadata:
+
+```bash
+uv sync --group docs   # reproducible, via `uv.lock`
+```
 
 ## Docker
 
