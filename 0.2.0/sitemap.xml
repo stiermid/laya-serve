@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+      <url>
+        <loc>https://stiermid.github.io/laya-serve/0.2.0/</loc>
+      </url>
+      <url>
+        <loc>https://stiermid.github.io/laya-serve/0.2.0/installation/</loc>
+      </url>
+      <url>
+        <loc>https://stiermid.github.io/laya-serve/0.2.0/quickstart/</loc>
+      </url>
+      <url>
+        <loc>https://stiermid.github.io/laya-serve/0.2.0/configuration/</loc>
+      </url>
+      <url>
+        <loc>https://stiermid.github.io/laya-serve/0.2.0/api/</loc>
+      </url>
+      <url>
+        <loc>https://stiermid.github.io/laya-serve/0.2.0/jev-compatibility/</loc>
+      </url>
+      <url>
+        <loc>https://stiermid.github.io/laya-serve/0.2.0/deployment/</loc>
+      </url>
+      <url>
+        <loc>https://stiermid.github.io/laya-serve/0.2.0/versioning/</loc>
+      </url>
+      <url>
+        <loc>https://stiermid.github.io/laya-serve/0.2.0/development/</loc>
+      </url>
+      <url>
+        <loc>https://stiermid.github.io/laya-serve/0.2.0/reference/</loc>
+      </url>
+</urlset>
