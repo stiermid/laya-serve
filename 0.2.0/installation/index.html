@@ -531,10 +531,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#extras" class="md-nav__link">
+  <a href="#extras-and-docs-group" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Extras
+        Extras and docs group
       </span>
     </span>
   </a>
@@ -1042,10 +1042,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#extras" class="md-nav__link">
+  <a href="#extras-and-docs-group" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Extras
+        Extras and docs group
       </span>
     </span>
   </a>
@@ -1105,7 +1105,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>sync<span class="w"> </span>--extra<span class="w"> </span><span class="nb">test</span>
 uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-q
 </code></pre></div>
-<h2 id="extras">Extras<a class="headerlink" href="#extras" title="Permanent link">&para;</a></h2>
+<h2 id="extras-and-docs-group">Extras and docs group<a class="headerlink" href="#extras-and-docs-group" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -1125,13 +1125,13 @@ uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </sp
 <td><code>laya&gt;=0.3.0</code>, <code>torch&gt;=2.0.0</code>, <code>transformers&gt;=4.48.0</code></td>
 <td><code>laya</code> backend with real checkpoints</td>
 </tr>
-<tr>
-<td><code>docs</code></td>
-<td><code>zensical</code>, <code>mkdocstrings-python</code>, <code>mike</code></td>
-<td>building this site</td>
-</tr>
 </tbody>
 </table>
+<p>Docs tooling (<code>zensical</code>, <code>mkdocstrings-python</code>, <code>mike</code>) is a
+<code>dependency-group</code>, not an extra — PyPI rejects the git-pinned <code>mike</code>
+dependency, so it must stay out of built package metadata:</p>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>sync<span class="w"> </span>--group<span class="w"> </span>docs<span class="w">   </span><span class="c1"># reproducible, via `uv.lock`</span>
+</code></pre></div>
 <h2 id="docker">Docker<a class="headerlink" href="#docker" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>laya-serve<span class="w"> </span>.
 docker<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span><span class="m">8000</span>:8000<span class="w"> </span>laya-serve
