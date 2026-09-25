@@ -1212,6 +1212,11 @@
 <td>No — fix the request</td>
 </tr>
 <tr>
+<td><code>429</code></td>
+<td>Rate limit exceeded (<code>LAYA_SERVE_RATE_LIMIT_PER_MINUTE</code>) with <code>Retry-After</code></td>
+<td>Yes, with backoff</td>
+</tr>
+<tr>
 <td><code>529</code></td>
 <td>Transient overload (GPU OOM, evicted checkpoint, timeout) with <code>Retry-After: 1</code></td>
 <td>Yes, with backoff</td>
@@ -1230,9 +1235,9 @@
 </table>
 <p>Validation limits: choice ≤ 255 options, score 2–10 levels, <code>model</code> required,
 non-empty <code>questions</code>. Context budgets mirror Jev's 64k (state + all questions)
-and 32k (state + longest question); oversize requests are <code>422</code>. Sizes are
-counted with the checkpoint tokenizer when one is resident, word approximation
-otherwise.</p>
+and 32k (state + longest question); oversize requests are <code>422</code>. Sizes use a
+deterministic word count on every backend so the <code>200</code>/<code>422</code> boundary is
+stable; per-request <code>usage.input_tokens</code> still comes from the Router.</p>
 
 
 

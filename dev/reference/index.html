@@ -1367,6 +1367,73 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Rate limiting
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#laya_serve.ratelimit" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ratelimit
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ratelimit">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#laya_serve.ratelimit.RateLimitExceeded" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        RateLimitExceeded
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#laya_serve.ratelimit.RateLimiter" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        RateLimiter
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="RateLimiter">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#laya_serve.ratelimit.RateLimiter.check" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        check
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#cli" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1935,6 +2002,73 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Rate limiting
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#laya_serve.ratelimit" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ratelimit
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ratelimit">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#laya_serve.ratelimit.RateLimitExceeded" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        RateLimitExceeded
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#laya_serve.ratelimit.RateLimiter" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        RateLimiter
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="RateLimiter">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#laya_serve.ratelimit.RateLimiter.check" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        check
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#cli" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2018,8 +2152,9 @@ the code in <code>src/laya_serve/</code>.</p>
 <li><code>GET /healthz</code> — liveness probe (not part of the Jev API).</li>
 </ul>
 <p>Errors are always Jev-shaped (<code>{"error": {"message", "field"}}</code>):
-<code>401</code> bad key, <code>422</code> validation, <code>529</code> transient overload (with
-<code>Retry-After</code>), <code>500</code> unexpected backend failure.</p>
+<code>401</code> bad key, <code>422</code> validation, <code>429</code> rate limit (with
+<code>Retry-After</code>), <code>529</code> transient overload (with <code>Retry-After</code>),
+<code>500</code> unexpected backend failure.</p>
 
 
 
@@ -2068,10 +2203,10 @@ the code in <code>src/laya_serve/</code>.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/laya_serve/app.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AuthError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AuthError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Raised when bearer auth fails; handled as a Jev-shaped ``401``."""</span>
 
     <span class="k">pass</span>
@@ -2369,7 +2504,14 @@ the code in <code>src/laya_serve/</code>.</p>
 <span class="normal">33</span>
 <span class="normal">34</span>
 <span class="normal">35</span>
-<span class="normal">36</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Settings</span><span class="p">(</span><span class="n">BaseSettings</span><span class="p">):</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Settings</span><span class="p">(</span><span class="n">BaseSettings</span><span class="p">):</span>
     <span class="n">model_config</span> <span class="o">=</span> <span class="n">SettingsConfigDict</span><span class="p">(</span><span class="n">env_prefix</span><span class="o">=</span><span class="s2">"LAYA_SERVE_"</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="s2">"ignore"</span><span class="p">)</span>
 
     <span class="c1"># Model id reported in the ``model`` response field.</span>
@@ -2395,6 +2537,13 @@ the code in <code>src/laya_serve/</code>.</p>
     <span class="c1"># When set, clients must send ``Authorization: Bearer &lt;api_key&gt;``.</span>
     <span class="c1"># Unset means no auth (local dev default).</span>
     <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># In-process fixed-window rate limit for ``POST /v1/systemone``,</span>
+    <span class="c1"># in requests per 60s window per client identity (API key when</span>
+    <span class="c1"># configured, else client IP). ``0`` (default) disables limiting to</span>
+    <span class="c1"># preserve single-process dev behaviour; production behind multiple</span>
+    <span class="c1"># workers should enforce limits at the gateway instead.</span>
+    <span class="n">rate_limit_per_minute</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -3217,7 +3366,10 @@ without model weights installed:</p>
 </ul>
 <p>Context budgets (Jev: 64k total, 32k state+longest-question) are enforced
 pre-inference from :meth:<code>Backend.count</code>, so oversize requests fail fast
-with <code>422</code> instead of being silently truncated downstream.</p>
+with <code>422</code> instead of being silently truncated downstream. Enforcement
+uses the deterministic weight-free word count on every backend so the
+<code>200</code>/<code>422</code> boundary never depends on which checkpoints happen to be
+resident; per-request <code>usage.input_tokens</code> still comes from the Router.</p>
 
 
 
@@ -3266,10 +3418,7 @@ with <code>422</code> instead of being silently truncated downstream.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/laya_serve/inference.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">101</span>
 <span class="normal">102</span>
 <span class="normal">103</span>
 <span class="normal">104</span>
@@ -3282,7 +3431,10 @@ with <code>422</code> instead of being silently truncated downstream.</p>
 <span class="normal">111</span>
 <span class="normal">112</span>
 <span class="normal">113</span>
-<span class="normal">114</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Minimal interface the API layer needs from any inference backend."""</span>
 
     <span class="n">serving_model</span><span class="p">:</span> <span class="nb">str</span>
@@ -3331,9 +3483,9 @@ with <code>422</code> instead of being silently truncated downstream.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/laya_serve/inference.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">questions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">questions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Return ``(total, state_plus_longest)`` token estimates for budgets."""</span>
     <span class="o">...</span>
 </code></pre></div></td></tr></table></div>
@@ -3358,9 +3510,9 @@ with <code>422</code> instead of being silently truncated downstream.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/laya_serve/inference.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">questions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">questions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Return ``{"answers": {...}, "usage": {...}}`` with raw backend answers."""</span>
     <span class="o">...</span>
 </code></pre></div></td></tr></table></div>
@@ -3403,10 +3555,7 @@ with <code>422</code> instead of being silently truncated downstream.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/laya_serve/inference.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">120</span>
 <span class="normal">121</span>
 <span class="normal">122</span>
 <span class="normal">123</span>
@@ -3444,7 +3593,10 @@ with <code>422</code> instead of being silently truncated downstream.</p>
 <span class="normal">155</span>
 <span class="normal">156</span>
 <span class="normal">157</span>
-<span class="normal">158</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FakeBackend</span><span class="p">:</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FakeBackend</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Deterministic weight-free backend for tests and local development."""</span>
 
     <span class="n">max_total_tokens</span> <span class="o">=</span> <span class="n">JEV_MAX_TOTAL_TOKENS</span>
@@ -3536,10 +3688,7 @@ with <code>422</code> instead of being silently truncated downstream.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/laya_serve/inference.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">164</span>
 <span class="normal">165</span>
 <span class="normal">166</span>
 <span class="normal">167</span>
@@ -3585,30 +3734,7 @@ with <code>422</code> instead of being silently truncated downstream.</p>
 <span class="normal">207</span>
 <span class="normal">208</span>
 <span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
-<span class="normal">213</span>
-<span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span>
-<span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span>
-<span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
-<span class="normal">226</span>
-<span class="normal">227</span>
-<span class="normal">228</span>
-<span class="normal">229</span>
-<span class="normal">230</span>
-<span class="normal">231</span>
-<span class="normal">232</span>
-<span class="normal">233</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LayaBackend</span><span class="p">:</span>
+<span class="normal">210</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LayaBackend</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Production backend wrapping ``laya.Router`` (lazy import)."""</span>
 
     <span class="n">max_total_tokens</span> <span class="o">=</span> <span class="n">JEV_MAX_TOTAL_TOKENS</span>
@@ -3645,42 +3771,16 @@ with <code>422</code> instead of being silently truncated downstream.</p>
         <span class="p">}</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">questions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">"""Estimate request tokens with a resident checkpoint tokenizer if any.</span>
+<span class="w">        </span><span class="sd">"""Estimate request size with the deterministic weight-free word count.</span>
 
-<span class="sd">        Falls back to the weight-free word count when no checkpoint is</span>
-<span class="sd">        loaded yet (cold start) or tokenization fails. Counts are raw</span>
-<span class="sd">        lengths without ``build_sequence`` truncation, so genuinely</span>
-<span class="sd">        oversize states still trip the budgets instead of saturating.</span>
+<span class="sd">        Deliberately independent of resident checkpoint tokenizers so the</span>
+<span class="sd">        ``200``/``422`` boundary is stable across cold starts, evictions,</span>
+<span class="sd">        and ``max_loaded`` rotation. Word counts underestimate true tokens,</span>
+<span class="sd">        so enforcement is lenient (fail-open); precise</span>
+<span class="sd">        ``usage.input_tokens`` still comes from the Router in</span>
+<span class="sd">        :meth:`predict`.</span>
 <span class="sd">        """</span>
-        <span class="n">tok</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resident_tokenizer</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">tok</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">count_request</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">questions</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">state_n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tok</span><span class="p">(</span><span class="n">render_text</span><span class="p">(</span><span class="n">state</span><span class="p">),</span> <span class="n">add_special_tokens</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="s2">"input_ids"</span><span class="p">])</span>
-            <span class="n">per_question</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="nb">len</span><span class="p">(</span><span class="n">tok</span><span class="p">(</span><span class="n">render_question_text</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="n">add_special_tokens</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="s2">"input_ids"</span><span class="p">])</span>
-                <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">questions</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-            <span class="p">]</span>
-        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">count_request</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">questions</span><span class="p">)</span>
-        <span class="n">longest</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">per_question</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">state_n</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">per_question</span><span class="p">),</span> <span class="n">state_n</span> <span class="o">+</span> <span class="n">longest</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_resident_tokenizer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Return a loaded checkpoint tokenizer, most-recently-used first."""</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">order</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_router</span><span class="p">,</span> <span class="s2">"_order"</span><span class="p">,</span> <span class="p">[])</span> <span class="ow">or</span> <span class="p">[])</span>
-            <span class="n">agents</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_router</span><span class="p">,</span> <span class="s2">"_agents"</span><span class="p">,</span> <span class="p">{})</span> <span class="ow">or</span> <span class="p">{}</span>
-        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">order</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">tok</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">agents</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="s2">"tok"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                <span class="k">continue</span>
-            <span class="k">if</span> <span class="n">tok</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">tok</span>
-        <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">count_request</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">questions</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -3708,19 +3808,18 @@ with <code>422</code> instead of being silently truncated downstream.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Estimate request tokens with a resident checkpoint tokenizer if any.</p>
-<p>Falls back to the weight-free word count when no checkpoint is
-loaded yet (cold start) or tokenization fails. Counts are raw
-lengths without <code>build_sequence</code> truncation, so genuinely
-oversize states still trip the budgets instead of saturating.</p>
+        <p>Estimate request size with the deterministic weight-free word count.</p>
+<p>Deliberately independent of resident checkpoint tokenizers so the
+<code>200</code>/<code>422</code> boundary is stable across cold starts, evictions,
+and <code>max_loaded</code> rotation. Word counts underestimate true tokens,
+so enforcement is lenient (fail-open); precise
+<code>usage.input_tokens</code> still comes from the Router in
+:meth:<code>predict</code>.</p>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/laya_serve/inference.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">197</span>
-<span class="normal">198</span>
-<span class="normal">199</span>
-<span class="normal">200</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">200</span>
 <span class="normal">201</span>
 <span class="normal">202</span>
 <span class="normal">203</span>
@@ -3730,34 +3829,17 @@ oversize states still trip the budgets instead of saturating.</p>
 <span class="normal">207</span>
 <span class="normal">208</span>
 <span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
-<span class="normal">213</span>
-<span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span>
-<span class="normal">217</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">questions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">"""Estimate request tokens with a resident checkpoint tokenizer if any.</span>
+<span class="normal">210</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">questions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Estimate request size with the deterministic weight-free word count.</span>
 
-<span class="sd">    Falls back to the weight-free word count when no checkpoint is</span>
-<span class="sd">    loaded yet (cold start) or tokenization fails. Counts are raw</span>
-<span class="sd">    lengths without ``build_sequence`` truncation, so genuinely</span>
-<span class="sd">    oversize states still trip the budgets instead of saturating.</span>
+<span class="sd">    Deliberately independent of resident checkpoint tokenizers so the</span>
+<span class="sd">    ``200``/``422`` boundary is stable across cold starts, evictions,</span>
+<span class="sd">    and ``max_loaded`` rotation. Word counts underestimate true tokens,</span>
+<span class="sd">    so enforcement is lenient (fail-open); precise</span>
+<span class="sd">    ``usage.input_tokens`` still comes from the Router in</span>
+<span class="sd">    :meth:`predict`.</span>
 <span class="sd">    """</span>
-    <span class="n">tok</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resident_tokenizer</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">tok</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">count_request</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">questions</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">state_n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tok</span><span class="p">(</span><span class="n">render_text</span><span class="p">(</span><span class="n">state</span><span class="p">),</span> <span class="n">add_special_tokens</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="s2">"input_ids"</span><span class="p">])</span>
-        <span class="n">per_question</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="nb">len</span><span class="p">(</span><span class="n">tok</span><span class="p">(</span><span class="n">render_question_text</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="n">add_special_tokens</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="s2">"input_ids"</span><span class="p">])</span>
-            <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">questions</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-        <span class="p">]</span>
-    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">count_request</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">questions</span><span class="p">)</span>
-    <span class="n">longest</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">per_question</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">state_n</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">per_question</span><span class="p">),</span> <span class="n">state_n</span> <span class="o">+</span> <span class="n">longest</span>
+    <span class="k">return</span> <span class="n">count_request</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">questions</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3804,16 +3886,16 @@ upstream timeout). Clients retry with backoff, honoring
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/laya_serve/inference.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">60</span>
 <span class="normal">61</span>
 <span class="normal">62</span>
 <span class="normal">63</span>
 <span class="normal">64</span>
 <span class="normal">65</span>
-<span class="normal">66</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">OverloadedError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">OverloadedError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Transient backend overload; handled as a Jev-shaped ``529``.</span>
 
 <span class="sd">    Backends raise this when inference could succeed on retry after a</span>
@@ -3847,13 +3929,13 @@ upstream timeout). Clients retry with backoff, honoring
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/laya_serve/inference.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">236</span>
-<span class="normal">237</span>
-<span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">build_backend</span><span class="p">(</span><span class="n">settings</span><span class="p">:</span> <span class="n">Settings</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Backend</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">build_backend</span><span class="p">(</span><span class="n">settings</span><span class="p">:</span> <span class="n">Settings</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Backend</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Instantiate the backend selected by ``settings.backend``."""</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">"fake"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">FakeBackend</span><span class="p">(</span><span class="n">serving_model</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">serving_model</span><span class="p">)</span>
@@ -3882,12 +3964,12 @@ upstream timeout). Clients retry with backoff, honoring
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/laya_serve/inference.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">52</span>
 <span class="normal">53</span>
-<span class="normal">54</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">count_request</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">questions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">count_request</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">questions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Weight-free (total, state+longest-question) word count of a request."""</span>
     <span class="n">state_n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">render_text</span><span class="p">(</span><span class="n">state</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
     <span class="n">per_question</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">render_question_text</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">())</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">questions</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
@@ -3915,10 +3997,10 @@ upstream timeout). Clients retry with backoff, honoring
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/laya_serve/inference.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">92</span>
-<span class="normal">93</span>
-<span class="normal">94</span>
-<span class="normal">95</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">is_overload</span><span class="p">(</span><span class="n">exc</span><span class="p">:</span> <span class="ne">BaseException</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">95</span>
+<span class="normal">96</span>
+<span class="normal">97</span>
+<span class="normal">98</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">is_overload</span><span class="p">(</span><span class="n">exc</span><span class="p">:</span> <span class="ne">BaseException</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return whether ``exc`` looks like transient overload (retryable)."""</span>
     <span class="n">haystack</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
     <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">marker</span> <span class="ow">in</span> <span class="n">haystack</span> <span class="k">for</span> <span class="n">marker</span> <span class="ow">in</span> <span class="n">_OVERLOAD_MARKERS</span><span class="p">)</span>
@@ -3944,15 +4026,15 @@ upstream timeout). Clients retry with backoff, honoring
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/laya_serve/inference.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">41</span>
 <span class="normal">42</span>
 <span class="normal">43</span>
 <span class="normal">44</span>
 <span class="normal">45</span>
-<span class="normal">46</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">render_question_text</span><span class="p">(</span><span class="n">qdef</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">render_question_text</span><span class="p">(</span><span class="n">qdef</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Rendered size basis of one question: instructions + criteria descriptions."""</span>
     <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">render_text</span><span class="p">(</span><span class="n">qdef</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"instructions"</span><span class="p">,</span> <span class="s2">""</span><span class="p">))]</span>
     <span class="n">criteria</span> <span class="o">=</span> <span class="n">qdef</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"criteria"</span><span class="p">)</span>
@@ -3983,11 +4065,11 @@ upstream timeout). Clients retry with backoff, honoring
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/laya_serve/inference.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">render_text</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">render_text</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Render one value as text, mirroring ``laya.common.render_criterion``."""</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">value</span>
@@ -3997,6 +4079,312 @@ upstream timeout). Clients retry with backoff, honoring
     </div>
 
 </div>
+
+
+
+  </div>
+
+    </div>
+
+</div><h2 id="rate-limiting">Rate limiting<a class="headerlink" href="#rate-limiting" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="laya_serve.ratelimit" class="doc doc-heading">
+            <code>laya_serve.ratelimit</code>
+
+
+<a href="#laya_serve.ratelimit" class="headerlink" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents first">
+
+        <p>In-memory fixed-window rate limiter for Jev-compatible <code>429</code> responses.</p>
+<p>Jev returns <code>429 Too Many Requests</code> when a client exceeds its rate limit;
+SDKs retry with exponential backoff. This module provides a minimal,
+dependency-free limiter suitable for single-process deployments.</p>
+<p>Multi-worker / multi-replica deployments should enforce limits at the
+reverse proxy / gateway instead (see <code>docs/deployment.md</code>); per-process
+counters do not coordinate across workers.</p>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="laya_serve.ratelimit.RateLimitExceeded" class="doc doc-heading">
+            <code>RateLimitExceeded</code>
+
+
+<a href="#laya_serve.ratelimit.RateLimitExceeded" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="Exception">Exception</span></code></p>
+
+
+
+        <p>Raised when a request exceeds the rate limit; handled as Jev <code>429</code>.</p>
+
+
+
+
+
+
+
+
+              <details class="mkdocstrings-source">
+                <summary>Source code in <code>src/laya_serve/ratelimit.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">RateLimitExceeded</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Raised when a request exceeds the rate limit; handled as Jev ``429``."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">retry_after</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">"Rate limit exceeded. Back off and retry after a short delay."</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">retry_after</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">retry_after</span><span class="p">))</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="laya_serve.ratelimit.RateLimiter" class="doc doc-heading">
+            <code>RateLimiter</code>
+
+
+<a href="#laya_serve.ratelimit.RateLimiter" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Fixed-window counter keyed by client identity.</p>
+<ul>
+<li><code>requests_per_minute &lt;= 0</code> means disabled (allow everything).</li>
+<li>Windows are 60-second fixed windows anchored on first use per key.</li>
+<li>Thread-safe via a single lock; counters are tiny dicts.</li>
+</ul>
+
+
+
+
+
+
+
+
+              <details class="mkdocstrings-source">
+                <summary>Source code in <code>src/laya_serve/ratelimit.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">RateLimiter</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Fixed-window counter keyed by client identity.</span>
+
+<span class="sd">    * ``requests_per_minute &lt;= 0`` means disabled (allow everything).</span>
+<span class="sd">    * Windows are 60-second fixed windows anchored on first use per key.</span>
+<span class="sd">    * Thread-safe via a single lock; counters are tiny dicts.</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">requests_per_minute</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">requests_per_minute</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">requests_per_minute</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+        <span class="c1"># key -&gt; (window_start_monotonic, count_in_window)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_windows</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">requests_per_minute</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">now</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Record one hit for ``key``.</span>
+
+<span class="sd">        Returns ``(allowed, retry_after_seconds)``. When ``allowed`` is</span>
+<span class="sd">        ``False``, ``retry_after_seconds`` is the whole seconds until the</span>
+<span class="sd">        current window resets (&gt;= 1).</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="k">if</span> <span class="n">now</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">now</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+            <span class="n">start</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_windows</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">timestamp</span> <span class="o">-</span> <span class="n">start</span> <span class="o">&gt;=</span> <span class="mf">60.0</span><span class="p">:</span>
+                <span class="n">start</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">timestamp</span><span class="p">,</span> <span class="mi">0</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_windows</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">count</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">requests_per_minute</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="mi">0</span>
+            <span class="n">retry_after</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="mf">60.0</span> <span class="o">-</span> <span class="p">(</span><span class="n">timestamp</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">retry_after</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="laya_serve.ratelimit.RateLimiter.check" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">check</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">now</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#laya_serve.ratelimit.RateLimiter.check" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Record one hit for <code>key</code>.</p>
+<p>Returns <code>(allowed, retry_after_seconds)</code>. When <code>allowed</code> is
+<code>False</code>, <code>retry_after_seconds</code> is the whole seconds until the
+current window resets (&gt;= 1).</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/laya_serve/ratelimit.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">now</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Record one hit for ``key``.</span>
+
+<span class="sd">    Returns ``(allowed, retry_after_seconds)``. When ``allowed`` is</span>
+<span class="sd">    ``False``, ``retry_after_seconds`` is the whole seconds until the</span>
+<span class="sd">    current window resets (&gt;= 1).</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="n">timestamp</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="k">if</span> <span class="n">now</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">now</span>
+    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+        <span class="n">start</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_windows</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">timestamp</span> <span class="o">-</span> <span class="n">start</span> <span class="o">&gt;=</span> <span class="mf">60.0</span><span class="p">:</span>
+            <span class="n">start</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">timestamp</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_windows</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">count</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">requests_per_minute</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="n">retry_after</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="mf">60.0</span> <span class="o">-</span> <span class="p">(</span><span class="n">timestamp</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">retry_after</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
 
 
 

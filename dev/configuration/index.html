@@ -584,6 +584,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Rate limiting
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1019,6 +1030,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Rate limiting
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1084,6 +1106,11 @@
 <td>unset</td>
 <td>When set, requires <code>Authorization: Bearer &lt;key&gt;</code></td>
 </tr>
+<tr>
+<td><code>LAYA_SERVE_RATE_LIMIT_PER_MINUTE</code></td>
+<td><code>0</code></td>
+<td><code>POST /v1/systemone</code> limit per 60s window per client; <code>0</code> disables</td>
+</tr>
 </tbody>
 </table>
 <h2 id="backends">Backends<a class="headerlink" href="#backends" title="Permanent link">&para;</a></h2>
@@ -1111,6 +1138,12 @@ When set, every <code>POST /v1/systemone</code> requires:</p>
 </code></pre></div>
 <p>Missing or wrong keys return <code>401</code> in the Jev error shape.
 <code>/healthz</code> and <code>/v1/models</code> stay unauthenticated.</p>
+<h2 id="rate-limiting">Rate limiting<a class="headerlink" href="#rate-limiting" title="Permanent link">&para;</a></h2>
+<p><code>LAYA_SERVE_RATE_LIMIT_PER_MINUTE=60</code> allows 60 <code>POST /v1/systemone</code>
+requests per 60s window per client identity (the <code>Authorization</code> value when
+<code>API_KEY</code> is set, else client IP). Excess requests return Jev-shaped <code>429</code>
+with <code>Retry-After</code>. <code>0</code> (default) disables in-process limiting. Counters are
+per-process; multi-worker deployments should enforce limits at the gateway.</p>
 
 
 

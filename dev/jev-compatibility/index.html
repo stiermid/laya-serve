@@ -1011,9 +1011,9 @@ Deliberate, documented divergences:</p>
    non-empty <code>questions</code> — all <code>422</code>. Context budgets mirror Jev's 64k
    (state + all questions) / 32k (state + longest question) accounting and
    surface as <code>422</code>, as do option sets overflowing the per-question head
-   budget; request sizes are counted with the checkpoint tokenizer when
-   one is loaded, word approximation otherwise. The checkpoint still
-   truncates per-question sequences at its own <code>max_len</code>.</li>
+   budget; request sizes use a deterministic word count on every backend
+   so the <code>200</code>/<code>422</code> boundary is stable across cold starts and evictions.
+   The checkpoint still truncates per-question sequences at its own <code>max_len</code>.</li>
 <li><strong>Score <code>legend</code>/<code>probabilities</code> keys are strings</strong> on the wire
    (<code>{"0": …}</code>), matching Jev HTTP.</li>
 <li><strong><code>choice</code> criteria as a list</strong> is accepted leniently (mapped to
@@ -1022,8 +1022,11 @@ Deliberate, documented divergences:</p>
 <h2 id="practical-notes">Practical notes<a class="headerlink" href="#practical-notes" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Unknown <code>model</code> names are <code>422</code> (fail fast on typos, like Jev).</li>
-<li><code>429</code> rate-limit handling is future work; transient pressure surfaces as
-  <code>529</code> with <code>Retry-After: 1</code>.</li>
+<li><code>429</code> is enforced in-process on <code>POST /v1/systemone</code> when
+  <code>LAYA_SERVE_RATE_LIMIT_PER_MINUTE &gt; 0</code> (per API key, else per client IP),
+  with <code>Retry-After</code>; transient pressure surfaces as <code>529</code> with
+  <code>Retry-After: 1</code>. Multi-worker deployments should enforce limits at the
+  gateway.</li>
 <li><code>500</code> responses never leak backend internals; details go to server logs.</li>
 </ul>
 

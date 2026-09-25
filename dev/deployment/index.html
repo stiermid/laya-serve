@@ -1070,8 +1070,10 @@ startup instead of on first request. Tune residency with
 <code>LAYA_SERVE_MAX_LOADED=1</code> and placement with <code>LAYA_SERVE_DEVICE=cuda</code>
 (or <code>cpu</code>).</p>
 <p>Host/port are CLI flags (<code>laya-serve --host 0.0.0.0 --port 8000</code>).
-Put TLS termination and rate limiting in front (reverse proxy / gateway);
-<code>429</code> handling in-app is future work.</p>
+Put TLS termination in front (reverse proxy / gateway). Single-process
+deployments can set <code>LAYA_SERVE_RATE_LIMIT_PER_MINUTE</code> for in-process <code>429</code>
+handling; multi-worker deployments should enforce rate limits at the gateway
+(per-process counters do not coordinate).</p>
 <h2 id="docker">Docker<a class="headerlink" href="#docker" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>laya-serve<span class="w"> </span>.
 docker<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span><span class="m">8000</span>:8000<span class="w"> </span><span class="se">\</span>
