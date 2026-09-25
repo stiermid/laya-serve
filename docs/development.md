@@ -27,7 +27,7 @@ pre-commit install && pre-commit run --all-files
 ## Docs preview
 
 ```bash
-uv sync --extra docs
+uv sync --group docs
 uv run zensical serve
 # -> http://127.0.0.1:8000
 ```

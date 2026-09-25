@@ -49,7 +49,7 @@ CI (`.github/workflows/docs.yml`) owns `gh-pages`; do not push it by hand:
 Local preview is unversioned and never pushes:
 
 ```bash
-uv sync --extra docs
+uv sync --group docs
 uv run zensical serve        # live preview of this checkout
 uv run zensical build --strict  # same check CI runs
 ```
