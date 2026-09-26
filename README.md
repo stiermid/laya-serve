@@ -7,10 +7,36 @@
 [![API](https://img.shields.io/badge/API-Jev--compatible-green.svg)](https://docs.typesafe.ai/api)
 [![Docs](https://img.shields.io/badge/docs-zensical-blue.svg)](https://stiermid.github.io/laya-serve/)
 
+> [!WARNING]
+> **Deprecated / archived — use `laya[serve]` instead.**
+> Upstream [`laya`](https://github.com/NandhaKishorM/laya) now ships
+> Jev-compatible serving natively (`pip install "laya[serve]"`, same
+> `laya-serve` binary, `POST /v1/systemone`). This repo is read-only and
+> will receive no further releases. See [Migration](#migration).
+
 Jev-compatible HTTP server for [Laya](https://huggingface.co/convaiinnovations/laya)
 System One decision models. Point any Jev client at this server and get typed
 `choice` / `score` / `noul` answers from local Laya weights instead of the
 TypeSafe API.
+
+## Migration
+
+```bash
+pip install "laya[serve]"
+LAYA_PRELOAD=1 laya-serve  # binds 0.0.0.0:8000, preloads all checkpoints
+```
+
+| This repo (`laya-serve`) | Upstream (`laya[serve]`) |
+| ------------------------ | ------------------------ |
+| `pip install "laya-serve[inference]"` | `pip install "laya[serve]"` (same `laya-serve` binary — uninstall this package first to avoid the script collision) |
+| `LAYA_SERVE_DEVICE` / `LAYA_SERVE_PRELOAD` | `LAYA_DEVICE` / `LAYA_PRELOAD` (defaults to preloaded) + `LAYA_MODELS`, `LAYA_THREADS`, `LAYA_MAX_CONCURRENT` |
+| `LAYA_SERVE_API_KEY` | `LAYA_API_KEY` |
+| `GET /healthz` | `GET /health` (adds `loaded` / `revisions` / `device`) |
+| `GET /v1/models` | No equivalent (removed) |
+| `model` outside the Jev allowlist → `422` | Unknown `model` is ignored and the Router auto-selects; `english` / `multilingual` / `typed-decisions` (or their Hub ids) pin a checkpoint |
+| In-process `429` rate limiting | Admission bound → `503` when saturated (enforce `429` at the gateway) |
+| `fake` backend for CI | No equivalent (removed) |
+| Strict caps (choice ≤ 255, score 2–10, 64k/32k budgets → `422`) and Jev `{"error": {"message", "field"}}` shape with `429`/`529` | Upstream caps (`2MB` body, 64 questions, per-question option caps → `400`/`413`/`422`) and plain `{"detail": …}` errors with `503`/`500` |
 
 ## Quickstart
 
