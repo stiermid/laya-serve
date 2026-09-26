@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "laya-serve"
-version = "0.2.0"
+version = "0.2.1"
 description = "Jev-compatible HTTP server for Laya System One decision models"
 readme = "README.md"
 requires-python = ">=3.10"
