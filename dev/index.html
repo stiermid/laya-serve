@@ -1033,6 +1033,16 @@
 
 
 <h1 id="laya-serve">laya-serve<a class="headerlink" href="#laya-serve" title="Permanent link">&para;</a></h1>
+<div class="admonition warning">
+<p class="admonition-title">Deprecated / archived — use <code>laya[serve]</code> instead.</p>
+<p>Upstream <a href="https://github.com/NandhaKishorM/laya"><code>laya</code></a> now ships
+Jev-compatible serving natively (<code>pip install "laya[serve]"</code>, same
+<code>laya-serve</code> binary, <code>POST /v1/systemone</code>). This repo is read-only and
+will receive no further releases. Migration guide lives in the
+<a href="https://github.com/stiermid/laya-serve#migration"><code>README</code></a>
+(<a href="https://github.com/stiermid/laya-serve#migration"><code>GET /healthz</code> → <code>GET /health</code>, no <code>/v1/models</code>, <code>model</code> auto-routes,
+<code>429</code>/<code>fake</code> backend removed</a>).</p>
+</div>
 <p>Jev-compatible HTTP server for <a href="https://huggingface.co/convaiinnovations/laya">Laya</a>
 System One decision models. Point any Jev client at this server and get typed
 <code>choice</code> / <code>score</code> / <code>noul</code> answers from local Laya weights instead of the
