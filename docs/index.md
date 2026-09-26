@@ -1,5 +1,14 @@
 # laya-serve
 
+!!! warning "Deprecated / archived — use `laya[serve]` instead."
+    Upstream [`laya`](https://github.com/NandhaKishorM/laya) now ships
+    Jev-compatible serving natively (`pip install "laya[serve]"`, same
+    `laya-serve` binary, `POST /v1/systemone`). This repo is read-only and
+    will receive no further releases. Migration guide lives in the
+    [`README`](https://github.com/stiermid/laya-serve#migration)
+    ([`GET /healthz` → `GET /health`, no `/v1/models`, `model` auto-routes,
+    `429`/`fake` backend removed](https://github.com/stiermid/laya-serve#migration)).
+
 Jev-compatible HTTP server for [Laya](https://huggingface.co/convaiinnovations/laya)
 System One decision models. Point any Jev client at this server and get typed
 `choice` / `score` / `noul` answers from local Laya weights instead of the
